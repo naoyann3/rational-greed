@@ -49,11 +49,11 @@
           <span class="font-bold text-emerald-600">35%</span>
         </div>
         <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1">
-          <span class="text-slate-600 font-medium">AI (Hard+Soft)</span>
+          <span class="text-slate-600 font-medium">AI Core (Hard)</span>
           <span class="font-bold text-indigo-600">20%</span>
         </div>
         <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1">
-          <span class="text-slate-600 font-medium">Defense/Software</span>
+          <span class="text-slate-600 font-medium">AI サテライト (Soft/Def)</span>
           <span class="font-bold text-cyan-600">20%</span>
         </div>
         <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1">
@@ -79,7 +79,6 @@
     <div class="mt-2 md:mt-0 text-right hidden md:block text-xl font-bold text-slate-700 font-mono">2025.12.25</div>
   </header>
 
-  <!-- 期間選択 -->
   <div class="mb-6 overflow-x-auto">
     <div class="flex gap-2 min-w-max">
       <button class="period-btn active px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="all">全期間</button>
@@ -95,19 +94,19 @@
         <canvas id="chart"></canvas>
       </div>
       
-      <div class="grid grid-cols-3 gap-2 md:gap-4">
-        <div class="card bg-gradient-to-br from-indigo-50 to-white py-4 px-6">
-          <div class="text-[10px] text-indigo-400 font-bold uppercase mb-1">Top Asset</div>
-          <div id="summary-best-name" class="text-sm md:text-xl font-black text-indigo-900 truncate">-</div>
+      <div class="grid grid-cols-3 gap-2 md:gap-4 text-center">
+        <div class="card bg-gradient-to-br from-indigo-50 to-white py-4 px-2">
+          <div class="text-[10px] text-indigo-400 font-bold uppercase mb-1">Top</div>
+          <div id="summary-best-name" class="text-xs md:text-sm font-black text-indigo-900 truncate">-</div>
           <div id="summary-best-val" class="text-xs font-bold text-indigo-600">-</div>
         </div>
-        <div class="card bg-white py-4 px-6 text-center">
+        <div class="card bg-white py-4 px-2">
           <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Average</div>
-          <div id="summary-avg" class="text-sm md:text-xl font-black text-slate-700">-</div>
+          <div id="summary-avg" class="text-sm md:text-lg font-black text-slate-700">-</div>
         </div>
-        <div class="card bg-white py-4 px-6 text-right">
-          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Bottom Asset</div>
-          <div id="summary-worst-name" class="text-sm md:text-xl font-black text-slate-700 truncate">-</div>
+        <div class="card bg-white py-4 px-2">
+          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Bottom</div>
+          <div id="summary-worst-name" class="text-xs md:text-sm font-black text-slate-700 truncate">-</div>
           <div id="summary-worst-val" class="text-xs font-bold text-slate-500">-</div>
         </div>
       </div>
@@ -118,20 +117,20 @@
           積立投資シミュレーション (円建て)
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <input type="number" id="monthly-amount" value="20000" class="w-full px-4 py-2 border rounded-lg font-medium">
-          <select id="start-year" class="w-full px-4 py-2 border rounded-lg font-medium">
+          <input type="number" id="monthly-amount" value="20000" class="w-full px-4 py-2 border rounded-lg font-medium text-sm">
+          <select id="start-year" class="w-full px-4 py-2 border rounded-lg font-medium text-sm">
             <option value="2021">2021年</option>
             <option value="2022">2022年</option>
             <option value="2023">2023年</option>
             <option value="2024">2024年</option>
             <option value="2025" selected>2025年</option>
           </select>
-          <select id="start-month" class="w-full px-4 py-2 border rounded-lg font-medium">
+          <select id="start-month" class="w-full px-4 py-2 border rounded-lg font-medium text-sm">
             <option value="01" selected>1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option>
             <option value="05">5月</option><option value="06">6月</option><option value="07">7月</option><option value="08">8月</option>
             <option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
           </select>
-          <button id="simulate-btn" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg">実行</button>
+          <button id="simulate-btn" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg text-sm">実行</button>
         </div>
         <div id="simulation-results" class="space-y-4"></div>
       </div>
@@ -152,36 +151,23 @@
 
 <script>
 // =========================================================
-//  データ定義 (2021/01 - 2025/11) : 円建て換算済み (Real Data)
+//  データ定義 (2021/01 - 2025/11) : 円建て換算済み
 // =========================================================
 const db = {
-  // AIハード (SMH)
   SMH: [11861,12834,13431,13232,13694,14382,14387,14887,14342,15574,17349,17766,15871,15509,16461,14904,13063,13919,15792,14131,13369,13984,15531,13304,15468,16317,17529,15533,18476,20353,22615,22822,21656,20719,23597,24660,27392,31931,34050,33465,37744,41941,37731,35564,35056,37026,36258,38020,37541,34918,31639,30420,38379,40303,43093,42137,48496,55869,55009],
-  
-  // AIソフト1 (CRWD)
-  CRWD: [22590,23010,20132,22708,24416,27779,27813,30894,27512,32078,24711,23559,20821,22565,22114,24203,20444,21808,24103,25464,26362,23828,23075,13805,13818,18711,18285,16365,22790,23405,20673,23395,25002,26351,34847,36005,43105,48301,48332,45729,49233,61648,35413,40525,40046,45482,51808,53717,61341,58454,73369,60292,65476,73604,73204,62292,72868,83569,79505],
-  
-  // AIソフト2 (PLTR)
+  AVGO: [4716,5006,5115,4968,5191,5321,5323,5466,5428,5723,6301,7656,6753,6790,7684,7189,7413,6636,7134,6924,6413,6949,7645,7330,7633,8101,8545,8541,11295,12558,12648,13484,12406,12546,13611,15742,17389,19593,20058,20325,20851,25829,24533,23798,24630,26010,24271,36398,34097,29917,25050,27388,34969,39841,42468,43722,49023,56886,62922],
   PLTR: [3683,2546,2569,2509,2522,2914,2381,2896,2691,2946,2350,2095,1580,1370,1675,1349,1109,1239,1379,1071,1174,1299,1041,842,1015,1152,1125,1056,2056,2220,2793,2190,2390,2207,2948,2421,2371,3467,3482,3434,3405,4075,3867,4601,5312,6367,10041,11863,12711,12739,12239,11854,18982,19684,23629,23039,27106,30852,26303],
-  
-  // 仮想通貨 (BTC)
+  CRWD: [22590,23010,20132,22708,24416,27779,27813,30894,27512,32078,24711,23559,20821,22565,22114,24203,20444,21808,24103,25464,26362,23828,23075,13805,13818,18711,18285,16365,22790,23405,20673,23395,25002,26351,34847,36005,43105,48301,48332,45729,49233,61648,35413,40525,40046,45482,51808,53717,61341,58454,73369,60292,65476,73604,73204,62292,72868,83569,79505],
   BTC: [3467557,4813675,6507676,6310030,4088027,3891489,4557750,5183873,4875342,6989294,6428337,5319007,4430489,4964484,5540012,4925250,4091192,2705066,3103425,2785170,2811424,3048933,2368041,2169712,3009478,3149604,3779598,3987163,3792091,4397975,4159102,3774683,4026381,5256500,5591733,5961862,6269113,9170140,10792036,9569960,10622342,10096447,9686116,8620933,9095437,10688597,14438361,14707594,14672003,12710027,12374921,13463700,15066900,15436001,17446478,15999985,16864269,16870246,14114830],
-
-  // 防衛 (ITA)
   ITA: [9324,10185,11463,11592,12123,12107,11841,11652,11668,11896,11164,11826,11657,12934,13519,13339,13056,13543,13831,14151,13171,15847,15530,14666,14962,15637,15685,15535,15190,16892,16577,16972,15829,16381,17624,17853,18075,19266,19966,20300,21349,21244,21860,21588,21367,22126,23296,22819,24128,23220,22906,22646,25531,27262,29338,29172,31095,33210,32026],
-
-  // 銀 (SLV)
   SILVER: [2616,2627,2418,2615,2847,2677,2592,2434,2297,2515,2397,2475,2397,2615,2792,2729,2535,2495,2300,2528,2528,3044,2835,2887,2848,2620,3015,3135,3021,3025,3194,3271,3038,3128,3401,3071,3082,3123,3443,3760,4357,4275,4030,3851,4058,4567,4181,4134,4393,4247,4638,4212,4321,4742,4972,5380,6296,6773,7996],
-
-  // 金 (GLD)
   GOLD: [18069,17238,17042,18041,19605,18308,18622,18658,18383,18971,18835,19671,19374,20618,22047,22942,21870,22472,21857,22102,22340,22454,22867,22242,23409,23144,24976,25192,25487,25244,25670,26301,25610,27450,27754,26959,27772,28521,31134,33123,33792,34591,34591,33804,34707,38839,36776,38013,39843,39493,43110,43220,43730,44053,45209,47258,52821,56654,60567],
-
-  // 指標 (SP500)
   SP500: [13641,14043,15142,15861,15975,16444,16777,17277,16951,18163,18432,19204,17837,17684,19683,18851,18669,18301,19236,19417,18548,20365,19380,18035,18524,19213,19167,19670,20875,22664,22984,23519,22940,22238,23926,24281,26026,27391,28559,28832,29510,31789,29851,29198,29562,32262,32695,34182,33955,31801,30280,28788,30919,32527,34608,34812,36175,38371,38984]
 };
 
 const meta = {
   SMH:    { label:'AI Semi (SMH)', color:'#4f46e5', type:'stock' },
+  AVGO:   { label:'AI Infra (AVGO)', color:'#1e3a8a', type:'stock' }, // Navy
   PLTR:   { label:'AI Data (PLTR)', color:'#a855f7', type:'stock' },
   CRWD:   { label:'AI Cyber (CRWD)', color:'#06b6d4', type:'stock' },
   BTC:    { label:'Bitcoin (BTC)', color:'#f97316', type:'crypto' },
@@ -201,7 +187,7 @@ for (let i = 0; i < 59; i++) {
 
 let myChart = null;
 let currentPeriod = 'all';
-let activeKeys = ['SMH', 'PLTR', 'CRWD', 'BTC', 'SILVER']; 
+let activeKeys = ['SMH', 'AVGO', 'PLTR', 'CRWD', 'BTC', 'SILVER']; 
 let selectedAssetKey = null;
 
 // =========================================================
@@ -239,7 +225,7 @@ function createAssetToggles() {
     const m = meta[key];
     const isChecked = activeKeys.includes(key) ? 'checked' : '';
     const div = document.createElement('div');
-    div.innerHTML = `<label class="cursor-pointer block"><input type="checkbox" class="asset-checkbox hidden" value="${key}" ${isChecked}><div class="flex items-center p-2 rounded-lg border border-transparent transition-all hover:bg-white" style="color:${m.color}"><span class="w-3 h-3 rounded-full mr-2" style="background-color:${m.color}"></span><span class="font-bold text-xs text-slate-700">${m.label}</span></div></label>`;
+    div.innerHTML = `<label class="cursor-pointer block"><input type="checkbox" class="asset-checkbox hidden" value="${key}" ${isChecked}><div class="flex items-center p-2 rounded-lg border border-transparent transition-all hover:bg-white" style="color:${m.color}"><span class="w-3 h-3 rounded-full mr-2" style="background-color:${m.color}"></span><span class="font-bold text-[10px] text-slate-700">${m.label}</span></div></label>`;
     container.appendChild(div);
   });
 }
@@ -287,12 +273,12 @@ function updateRanking(keys, startIdx) {
   const performance = keys.map(key => {
     const data = db[key];
     const change = ((data[data.length-1] - data[startIdx]) / data[startIdx]) * 100;
-    return { key, change, label: meta[key].label, color: meta[key].color, val: data[data.length-1] };
+    return { key, change, label: meta[key].label, color: meta[key].color };
   }).sort((a, b) => b.change - a.change);
 
   performance.forEach((item, i) => {
     const div = document.createElement('div');
-    div.className = "ranking-item p-2 rounded flex justify-between items-center text-xs";
+    div.className = "ranking-item p-2 rounded flex justify-between items-center text-[10px]";
     div.innerHTML = `<div><span class="font-bold" style="color:${item.color}">${item.label}</span></div><div class="text-right font-black ${item.change>=0?'text-emerald-500':'text-rose-500'}">${item.change.toFixed(1)}%</div>`;
     list.appendChild(div);
   });
@@ -320,13 +306,26 @@ function setupSimulationListeners() {
     container.innerHTML = results.map(r => `
       <div class="p-3 border rounded-lg bg-white border-l-4" style="border-left-color:${r.color}">
         <div class="flex justify-between items-center">
-          <span class="font-bold text-sm">${r.label}</span>
-          <span class="text-xs font-black ${r.profit>=0?'text-emerald-600':'text-rose-600'}">${r.profitPercentage.toFixed(1)}%</span>
+          <span class="font-bold text-xs">${r.label}</span>
+          <span class="text-[10px] font-black ${r.profit>=0?'text-emerald-600':'text-rose-600'}">${r.profitPercentage.toFixed(1)}%</span>
         </div>
-        <div class="text-right font-black text-lg">¥${Math.floor(r.currentValue).toLocaleString()}</div>
+        <div class="text-right font-black text-sm">¥${Math.floor(r.currentValue).toLocaleString()}</div>
       </div>
     `).join('');
   });
+}
+
+function calculateMonthlyInvestment(assetKey, monthlyAmount, startDate) {
+  const data = db[assetKey];
+  const startIndex = labels.indexOf(startDate);
+  if (startIndex === -1 || startIndex >= data.length) return null;
+  let totalUnits = 0, totalInvestment = 0;
+  for (let i = startIndex; i < data.length; i++) {
+    totalUnits += monthlyAmount / data[i];
+    totalInvestment += monthlyAmount;
+  }
+  const currentValue = totalUnits * data[data.length - 1];
+  return { totalInvestment, currentValue, profit: currentValue - totalInvestment, profitPercentage: ((currentValue - totalInvestment) / totalInvestment) * 100 };
 }
 
 function renderChart() {
@@ -338,10 +337,7 @@ function renderChart() {
       responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'nearest', axis: 'x', intersect: false },
       plugins: { legend: { display: false }, tooltip: { enabled: true } },
-      scales: { 
-        x: { grid: { display: false } },
-        y: { ticks: { callback: v => v + '%' } }
-      },
+      scales: { x: { grid: { display: false } }, y: { ticks: { callback: v => v + '%' } } },
       layout: { padding: { right: 50 } }
     }
   });
