@@ -344,8 +344,8 @@ function init() {
   setupSimulationListeners();
   updateDashboard();
   
-  // ★自動実行 (APIキーを設定してからコメントアウトを外す)
-  fetchRealtimeData();
+  // ★追加：ページ読み込み時にリアルタイムデータを取得
+  fetchRealtimeData(); 
 }
 
 function createAssetToggles() {
