@@ -270,10 +270,12 @@ function initPortfolioChart() {
 function init() {
   initPortfolioChart();
   createAssetToggles();
-  setupEventListeners();
   renderChart();
-  updateDashboard();
   setupSimulationListeners();
+  updateDashboard();
+  
+  // ★追加：ページ読み込み時にリアルタイムデータを取得
+  fetchRealtimeData(); 
 }
 
 function createAssetToggles() {
