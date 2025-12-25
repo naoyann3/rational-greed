@@ -16,18 +16,21 @@
   .asset-checkbox:checked + div { background-color: #f1f5f9; border-color: currentColor; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
   .period-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
   .period-btn.active { background-color: #0f172a; color: white; border-color: #0f172a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
+  /* シミュレーション結果カードのアニメーション */
+  .simulation-result-card { transition: all 0.3s ease; border-left: 4px solid transparent; }
+  .simulation-result-card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05); }
 </style>
 </head>
 <body class="p-3 md:p-8 max-w-[1600px] mx-auto bg-slate-50 pb-20">
 
-  <!-- ★戦略ポートフォリオ表示エリア (Rational Greed v5.0) -->
+  <!-- ★戦略ポートフォリオ表示エリア -->
   <div class="card mb-6 p-4 bg-indigo-50 border-l-4 border-indigo-600 text-slate-900 shadow-sm">
     <div class="flex justify-between items-start mb-4">
       <h3 class="text-sm font-bold flex items-center">
         <span class="mr-2 text-indigo-900">📊 2026 Target Portfolio</span>
         <span class="text-[10px] bg-indigo-200 px-2 py-0.5 rounded text-indigo-800 font-extrabold">Rational Greed v5.0</span>
       </h3>
-      <div class="text-[10px] text-slate-500 bg-white px-2 py-1 rounded border border-slate-200 font-medium italic">VIVA LA RATIONAL GREED.</div>
+      <div class="text-[10px] text-slate-500 bg-white px-2 py-1 rounded border border-slate-200 font-medium">戦略: 待機で機会を買い、需給で利益を取る</div>
     </div>
     <div class="flex flex-col md:flex-row items-center gap-8">
       <div class="w-40 h-40 relative shrink-0"><canvas id="portfolioChart"></canvas></div>
@@ -49,13 +52,15 @@
     <div class="text-xl font-bold text-slate-700 font-mono hidden md:block">2025.12.25</div>
   </header>
 
-  <div class="mb-6 overflow-x-auto flex gap-2">
-    <button class="period-btn active px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="all">全期間</button>
-    <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2021">2021〜</button>
-    <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2022">2022〜</button>
-    <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2023">2023〜</button>
-    <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2024">2024〜</button>
-    <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2025">2025〜</button>
+  <div class="mb-6 overflow-x-auto">
+    <div class="flex gap-2 min-w-max">
+      <button class="period-btn active px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="all">全期間</button>
+      <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2021">2021〜</button>
+      <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2022">2022〜</button>
+      <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2023">2023〜</button>
+      <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2024">2024〜</button>
+      <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2025">2025〜</button>
+    </div>
   </div>
 
   <div class="flex flex-col lg:grid lg:grid-cols-4 gap-6">
@@ -63,14 +68,15 @@
       <div class="card h-[55vh] md:h-[650px] relative p-1 md:p-6 w-full">
         <canvas id="chart"></canvas>
       </div>
+      
       <div class="grid grid-cols-3 gap-2 md:gap-4 text-center">
         <div class="card bg-gradient-to-br from-indigo-50 to-white py-4 px-2">
-          <div class="text-[10px] text-indigo-400 font-bold uppercase mb-1">Top Change</div>
+          <div class="text-[10px] text-indigo-400 font-bold uppercase mb-1">Top</div>
           <div id="summary-best-name" class="text-xs md:text-sm font-black text-indigo-900 truncate">-</div>
           <div id="summary-best-val" class="text-xs font-bold text-indigo-600">-</div>
         </div>
         <div class="card bg-white py-4 px-2 flex flex-col justify-center">
-          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Avg Performance</div>
+          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Avg Change</div>
           <div id="summary-avg" class="text-sm md:text-lg font-black text-slate-700">-</div>
         </div>
         <div class="card bg-white py-4 px-2 text-right">
@@ -79,6 +85,7 @@
           <div id="summary-worst-val" class="text-xs font-bold text-slate-500">-</div>
         </div>
       </div>
+
       <div class="card">
         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6 flex items-center"><span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded mr-2">SIM</span> 積立シミュレーション</h3>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -89,7 +96,7 @@
           <select id="start-month" class="w-full px-4 py-2 border rounded-lg font-medium text-sm">
             <option value="01" selected>1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option><option value="05">5月</option><option value="06">6月</option><option value="07">7月</option><option value="08">8月</option><option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
           </select>
-          <button id="simulate-btn" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg text-sm transition active:scale-95">実行</button>
+          <button id="simulate-btn" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg text-sm hover:bg-indigo-700 transition active:scale-95">実行</button>
         </div>
         <div id="simulation-results" class="space-y-4"></div>
       </div>
@@ -97,7 +104,7 @@
 
     <div class="lg:col-span-1 space-y-6 order-2">
       <div class="card p-4">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">表示銘柄 (全12種)</h3>
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">表示銘柄</h3>
         <div class="grid grid-cols-1 gap-1" id="asset-toggles"></div>
       </div>
       <div class="card h-[400px] flex flex-col">
@@ -109,7 +116,7 @@
 
 <script>
 // =========================================================
-//  DATA DEFINITION (円建て・株式分割・為替反映済み)
+//  DATA DEFINITION (Real 円建て Data)
 // =========================================================
 const db = {
   ASML: [55915,60412,68098,70580,74238,76361,84088,91588,83404,92534,90076,91606,78055,76972,81501,73110,73641,64999,76531,67971,60002,69829,84373,71638,86226,84207,90671,86716,100989,104931,101416,105156,87928,89288,100539,106740,128184,143376,146870,136371,150730,164536,156139,132100,119022,127814,158615,108753,113925,106371,99140,95067,106124,115814,109945,107270,144464,163015,165519],
@@ -153,8 +160,24 @@ for (let i = 0; i < 59; i++) {
 
 let myChart = null;
 let currentPeriod = 'all';
+// S&P500以外全てアクティブ
 let activeKeys = Object.keys(db).filter(k => k !== 'SP500'); 
 let selectedAssetKey = null;
+
+// --- PLUGINS ---
+const negativeZonePlugin = {
+  id: 'negativeZone',
+  beforeDraw: (chart) => {
+    const { ctx, chartArea, scales } = chart;
+    const zeroPixel = scales.y.getPixelForValue(0);
+    if (zeroPixel < chartArea.bottom) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(220, 38, 38, 0.05)'; 
+        ctx.fillRect(chartArea.left, zeroPixel, chartArea.width, chartArea.bottom - zeroPixel);
+        ctx.restore();
+    }
+  }
+};
 
 const customLabelPlugin = {
   id: 'customSmartLabels',
@@ -207,7 +230,7 @@ function createAssetToggles() {
     const m = meta[key];
     const isChecked = activeKeys.includes(key) ? 'checked' : '';
     const div = document.createElement('div');
-    div.innerHTML = `<label class="cursor-pointer block"><input type="checkbox" class="asset-checkbox hidden" value="${key}" ${isChecked}><div class="flex items-center p-1.5 rounded-lg border border-transparent transition-all hover:bg-white" style="color:${m.color}"><span class="w-2.5 h-2.5 rounded-full mr-2" style="background-color:${m.color}"></span><span class="font-bold text-[9px] text-slate-700">${m.label}</span></div></label>`;
+    div.innerHTML = `<label class="cursor-pointer block mb-1"><input type="checkbox" class="asset-checkbox hidden" value="${key}" ${isChecked}><div class="flex items-center p-1.5 rounded-lg border border-transparent transition-all hover:bg-white" style="color:${m.color}"><span class="w-2.5 h-2.5 rounded-full mr-2" style="background-color:${m.color}"></span><span class="font-bold text-[9px] text-slate-700">${m.label}</span></div></label>`;
     container.appendChild(div);
   });
   container.addEventListener('change', () => {
@@ -231,7 +254,12 @@ function updateDashboard(mode = 'default') {
   myChart.data.datasets = activeKeys.map(key => {
     const rawData = db[key].slice(startIdx);
     const base = rawData[0];
-    return { label: meta[key].label, data: rawData.map(v => base ? ((v - base) / base) * 100 : 0), borderColor: meta[key].color, borderWidth: 2, pointRadius: 0, tension: 0.1 };
+    return {
+      label: meta[key].label,
+      data: rawData.map(v => base ? ((v - base) / base) * 100 : 0),
+      borderColor: meta[key].color,
+      borderWidth: 2, pointRadius: 0, tension: 0.1
+    };
   });
   myChart.update(mode);
   updateRanking(activeKeys, startIdx);
@@ -249,7 +277,7 @@ function updateRanking(keys, startIdx) {
       <span class="font-bold" style="color:${item.color}">${item.label}</span>
       <span class="font-black ${item.change>=0?'text-emerald-500':'text-rose-500'}">${item.change.toFixed(1)}%</span>
     </div>`).join('');
-
+  
   if(performance.length > 0) {
     document.getElementById('summary-best-name').textContent = performance[0].label;
     document.getElementById('summary-best-val').textContent = performance[0].change.toFixed(1) + '%';
@@ -273,7 +301,26 @@ function setupSimulationListeners() {
       const curVal = totalUnits * data[data.length-1];
       return { label: meta[key].label, color: meta[key].color, currentValue: curVal, profitPerc: ((curVal - totalInv) / totalInv) * 100 };
     }).filter(r => r).sort((a,b) => b.profitPerc - a.profitPerc);
-    document.getElementById('simulation-results').innerHTML = results.map(r => `<div class="p-2 border rounded bg-white border-l-4 mb-2" style="border-left-color:${r.color}"><div class="flex justify-between text-[9px] font-bold"><span>${r.label}</span><span class="${r.profitPerc>=0?'text-emerald-600':'text-rose-600'}">${r.profitPerc.toFixed(1)}%</span></div><div class="text-right font-black text-xs">¥${Math.floor(r.currentValue).toLocaleString()}</div></div>`).join('');
+    
+    // 詳細版カードデザイン
+    document.getElementById('simulation-results').innerHTML = results.map((r, index) => `
+      <div class="simulation-result-card p-5 border border-slate-200 rounded-xl bg-white mb-4 ${r.profitPerc >= 0 ? 'border-l-emerald-500' : 'border-l-rose-500'}" style="border-left-color:${r.color}">
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex items-center">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3" style="background-color:${r.color}">${index + 1}</div>
+            <div>
+              <div class="flex items-center">
+                <span class="font-bold text-slate-900 text-lg">${r.label}</span>
+                <span class="ml-2 text-xs font-medium px-2 py-1 rounded-full ${r.profitPerc >= 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${r.profitPerc.toFixed(1)}%</span>
+              </div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-slate-500">現在価値</div>
+            <div class="font-black text-xl text-slate-800">¥${Math.floor(r.currentValue).toLocaleString()}</div>
+          </div>
+        </div>
+      </div>`).join('');
   });
 }
 
@@ -281,7 +328,7 @@ function renderChart() {
   myChart = new Chart(document.getElementById('chart'), {
     type: 'line',
     data: { labels: [], datasets: [] },
-    plugins: [customLabelPlugin],
+    plugins: [customLabelPlugin, negativeZonePlugin],
     options: {
       responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'nearest', axis: 'x', intersect: false },
