@@ -20,7 +20,7 @@
 </head>
 <body class="p-3 md:p-8 max-w-[1600px] mx-auto bg-slate-50 pb-20">
 
-  <!-- ★戦略ポートフォリオ表示エリア -->
+  <!-- ★戦略ポートフォリオ表示エリア (Rational Greed v5.0) -->
   <div class="card mb-6 p-4 bg-indigo-50 border-l-4 border-indigo-600 text-slate-900 shadow-sm">
     <div class="flex justify-between items-start mb-4">
       <h3 class="text-sm font-bold flex items-center">
@@ -45,21 +45,26 @@
     <div class="flex justify-between items-end">
       <div>
         <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">資産パフォーマンス推移</h1>
-        <p class="text-slate-500 font-medium text-xs md:text-sm">2021.01 - 2025.11 (円建て・株式分割調整済み)</p>
+        <p class="text-slate-500 font-medium text-xs md:text-sm">2021.01 - 2025.11 (円建て換算・為替反映済み)</p>
       </div>
       <div class="text-xl font-bold text-slate-700 font-mono hidden md:block text-right">
-        <div class="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Last Update</div>
+        <div class="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Observation Station</div>
         2025.12.25
       </div>
     </div>
   </header>
 
-  <div class="mb-6 overflow-x-auto">
-    <div class="flex gap-2 min-w-max">
-      <button class="period-btn active px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="all">全期間</button>
-      <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2022">2022年〜</button>
-      <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2024">2024年〜</button>
-      <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2025">2025年〜</button>
+  <!-- 💡 期間選択ボタン：2021〜2025までフルセット化 -->
+  <div class="mb-6">
+    <div class="overflow-x-auto pb-2 -mx-3 px-3 md:mx-0 md:px-0 scroll-fade-right">
+      <div class="flex gap-2 min-w-max">
+        <button class="period-btn active px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="all">全期間</button>
+        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2021">2021年〜</button>
+        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2022">2022年〜</button>
+        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2023">2023年〜</button>
+        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2024">2024年〜</button>
+        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2025">2025年〜</button>
+      </div>
     </div>
   </div>
 
@@ -68,6 +73,8 @@
       <div class="card h-[55vh] md:h-[650px] relative p-1 md:p-6 w-full">
         <canvas id="chart"></canvas>
       </div>
+      
+      <!-- Summary Cards -->
       <div class="grid grid-cols-3 gap-2 md:gap-4 text-center">
         <div class="card bg-gradient-to-br from-indigo-50 to-white py-4 px-2">
           <div class="text-[10px] text-indigo-400 font-bold uppercase mb-1">Top</div>
@@ -86,9 +93,10 @@
       </div>
     </div>
 
+    <!-- Sidebar -->
     <div class="lg:col-span-1 space-y-6 order-2">
       <div class="card p-4">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">表示銘柄 (注視リスト)</h3>
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">注視リスト (表示切替)</h3>
         <div class="grid grid-cols-1 gap-1" id="asset-toggles"></div>
       </div>
       <div class="card h-[400px] flex flex-col">
@@ -100,7 +108,7 @@
 
 <script>
 // =========================================================
-//  データ定義 (2021/01 - 2025/11) : 円建て換算済み
+//  DATA DEFINITION (Real 円建て Data)
 // =========================================================
 const db = {
   NVDA: [1361,1460,1478,1649,1770,2211,2155,2452,2317,2824,3722,3383,2824,2832,3532,2414,2402,1929,2420,2026,1681,1860,2317,1683,2518,3244,3704,3852,5859,6588,6939,6078,5945,6443,7335,7281,9535,12440,13665,13636,16194,17143,15350,18364,18073,18683,18810,21124,18620,18943,16641,16204,21096,25227,30293,28646,31230,34800,31230],
@@ -116,7 +124,7 @@ const db = {
 };
 
 const meta = {
-  NVDA:   { label:'NVIDIA (注視)', color:'#84cc16', type:'stock' }, // NVDA Green
+  NVDA:   { label:'NVIDIA', color:'#84cc16', type:'stock' },
   SMH:    { label:'AI Semi (SMH)', color:'#4f46e5', type:'stock' },
   AVGO:   { label:'AI Infra (AVGO)', color:'#1e3a8a', type:'stock' },
   PLTR:   { label:'AI Data (PLTR)', color:'#a855f7', type:'stock' },
@@ -138,10 +146,10 @@ for (let i = 0; i < 59; i++) {
 
 let myChart = null;
 let currentPeriod = 'all';
-// SP500 以外を全てアクティブにする
 let activeKeys = ['NVDA', 'SMH', 'AVGO', 'PLTR', 'CRWD', 'BTC', 'ITA', 'SILVER', 'GOLD']; 
 let selectedAssetKey = null;
 
+// --- PLUGINS ---
 const customLabelPlugin = {
   id: 'customSmartLabels',
   afterDatasetsDraw: (chart) => {
@@ -190,8 +198,9 @@ function createAssetToggles() {
   const container = document.getElementById('asset-toggles');
   Object.keys(meta).forEach(key => {
     const m = meta[key];
+    const isChecked = activeKeys.includes(key) ? 'checked' : '';
     const div = document.createElement('div');
-    div.innerHTML = `<label class="cursor-pointer block"><input type="checkbox" class="asset-checkbox hidden" value="${key}" ${activeKeys.includes(key)?'checked':''}><div class="flex items-center p-1.5 rounded-lg border border-transparent transition-all hover:bg-white" style="color:${m.color}"><span class="w-2.5 h-2.5 rounded-full mr-2" style="background-color:${m.color}"></span><span class="font-bold text-[9px] text-slate-700">${m.label}</span></div></label>`;
+    div.innerHTML = `<label class="cursor-pointer block"><input type="checkbox" class="asset-checkbox hidden" value="${key}" ${isChecked}><div class="flex items-center p-1.5 rounded-lg border border-transparent transition-all hover:bg-white" style="color:${m.color}"><span class="w-2.5 h-2.5 rounded-full mr-2" style="background-color:${m.color}"></span><span class="font-bold text-[9px] text-slate-700">${m.label}</span></div></label>`;
     container.appendChild(div);
   });
   container.addEventListener('change', () => {
@@ -244,8 +253,7 @@ function updateRanking(keys, startIdx) {
     document.getElementById('summary-best-val').textContent = performance[0].change.toFixed(1) + '%';
     document.getElementById('summary-worst-name').textContent = performance[performance.length-1].label;
     document.getElementById('summary-worst-val').textContent = performance[performance.length-1].change.toFixed(1) + '%';
-    const avg = performance.reduce((s, p) => s + p.change, 0) / performance.length;
-    document.getElementById('summary-avg').textContent = avg.toFixed(1) + '%';
+    document.getElementById('summary-avg').textContent = (performance.reduce((s, p) => s + p.change, 0) / performance.length).toFixed(1) + '%';
   }
 }
 
