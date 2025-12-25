@@ -10,13 +10,12 @@
 <style>
   body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: #f8fafc; color: #0f172a; -webkit-tap-highlight-color: transparent; }
   .card { background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); padding: 20px; border: 1px solid #e2e8f0; }
+  .ranking-scroll { max-height: 500px; overflow-y: auto; }
   .ranking-scroll::-webkit-scrollbar { width: 4px; }
-  .ranking-scroll::-webkit-scrollbar-track { background: transparent; }
   .ranking-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
   .asset-checkbox:checked + div { background-color: #f1f5f9; border-color: currentColor; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
   .period-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); touch-action: manipulation; }
   .period-btn.active { background-color: #0f172a; color: white; border-color: #0f172a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
-  .simulation-result-card { transition: all 0.3s ease; border-left: 4px solid transparent; }
 </style>
 </head>
 <body class="p-3 md:p-8 max-w-[1600px] mx-auto bg-slate-50 pb-20">
@@ -33,11 +32,11 @@
     <div class="flex flex-col md:flex-row items-center gap-8">
       <div class="w-40 h-40 relative shrink-0"><canvas id="portfolioChart"></canvas></div>
       <div class="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
-        <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1"><span class="text-slate-600">Cash</span><span class="font-bold text-emerald-600">35%</span></div>
-        <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1"><span class="text-slate-600">AI Core</span><span class="font-bold text-indigo-600">20%</span></div>
-        <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1"><span class="text-slate-600">AI Satellite</span><span class="font-bold text-cyan-600">20%</span></div>
-        <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1"><span class="text-slate-600">Bitcoin</span><span class="font-bold text-orange-600">15%</span></div>
-        <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1"><span class="text-slate-600">Silver</span><span class="font-bold text-slate-500">10%</span></div>
+        <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1"><span class="text-slate-600 font-medium">Cash (円/ドル)</span><span class="font-bold text-emerald-600">35%</span></div>
+        <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1"><span class="text-slate-600 font-medium">AI Core (H+S)</span><span class="font-bold text-indigo-600">20%</span></div>
+        <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1"><span class="text-slate-600 font-medium">AIサテライト (Def)</span><span class="font-bold text-cyan-600">20%</span></div>
+        <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1"><span class="text-slate-600 font-medium">Bitcoin (BTC)</span><span class="font-bold text-orange-600">15%</span></div>
+        <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1"><span class="text-slate-600 font-medium">Silver (銀)</span><span class="font-bold text-slate-500">10%</span></div>
       </div>
     </div>
   </div>
@@ -70,8 +69,8 @@
           <div id="summary-best-name" class="text-xs md:text-sm font-black text-indigo-900 truncate">-</div>
           <div id="summary-best-val" class="text-xs font-bold text-indigo-600">-</div>
         </div>
-        <div class="card bg-white py-4 px-2 text-center">
-          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Avg Change</div>
+        <div class="card bg-white py-4 px-2">
+          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Average Change</div>
           <div id="summary-avg" class="text-sm md:text-lg font-black text-slate-700">-</div>
         </div>
         <div class="card bg-white py-4 px-2 text-right">
@@ -90,19 +89,20 @@
           <select id="start-month" class="w-full px-4 py-2 border rounded-lg font-medium text-sm">
             <option value="01" selected>1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option><option value="05">5月</option><option value="06">6月</option><option value="07">7月</option><option value="08">8月</option><option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
           </select>
-          <button id="simulate-btn" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg text-sm">シミュレーション実行</button>
+          <button id="simulate-btn" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg text-sm">実行</button>
         </div>
         <div id="simulation-results" class="space-y-4"></div>
       </div>
     </div>
+
     <div class="lg:col-span-1 space-y-6 order-2">
       <div class="card p-4">
         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">表示銘柄</h3>
-        <div class="grid grid-cols-1 gap-2" id="asset-toggles"></div>
+        <div class="grid grid-cols-1 gap-1" id="asset-toggles"></div>
       </div>
       <div class="card h-[400px] flex flex-col">
         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">騰落率ランキング</h3>
-        <div class="flex-1 overflow-y-auto ranking-scroll pr-1 space-y-1" id="ranking-list"></div>
+        <div class="flex-1 ranking-scroll pr-1 space-y-1" id="ranking-list"></div>
       </div>
     </div>
   </div>
@@ -146,7 +146,6 @@ let currentPeriod = 'all';
 let activeKeys = ['SMH', 'AVGO', 'PLTR', 'CRWD', 'BTC', 'ITA', 'SILVER', 'GOLD']; 
 let selectedAssetKey = null;
 
-// --- PLUGINS ---
 const negativeZonePlugin = {
   id: 'negativeZone',
   beforeDraw: (chart) => {
@@ -164,10 +163,9 @@ const negativeZonePlugin = {
 const customLabelPlugin = {
   id: 'customSmartLabels',
   afterDatasetsDraw: (chart) => {
-    const { ctx, chartArea, scales } = chart;
+    const { ctx, chartArea } = chart;
     const isMobile = window.innerWidth < 768;
     const labelPoints = [];
-
     chart.data.datasets.forEach((ds, i) => {
       const meta = chart.getDatasetMeta(i);
       if (meta.hidden) return;
@@ -176,21 +174,14 @@ const customLabelPlugin = {
         labelPoints.push({ index: i, y: lastPoint.y, label: ds.label, color: ds.borderColor });
       }
     });
-
     labelPoints.sort((a, b) => a.y - b.y);
     const labelHeight = isMobile ? 14 : 18;
     for (let i = 1; i < labelPoints.length; i++) {
-      if (labelPoints[i].y < labelPoints[i-1].y + labelHeight) {
-        labelPoints[i].y = labelPoints[i-1].y + labelHeight;
-      }
+      if (labelPoints[i].y < labelPoints[i-1].y + labelHeight) { labelPoints[i].y = labelPoints[i-1].y + labelHeight; }
     }
-
     ctx.save();
     ctx.font = `bold ${isMobile ? '9px' : '11px'} sans-serif`;
-    labelPoints.forEach(p => {
-      ctx.fillStyle = p.color;
-      ctx.fillText(p.label, chartArea.right + 5, p.y);
-    });
+    labelPoints.forEach(p => { ctx.fillStyle = p.color; ctx.fillText(p.label, chartArea.right + 5, p.y); });
     ctx.restore();
   }
 };
@@ -218,8 +209,9 @@ function createAssetToggles() {
   const container = document.getElementById('asset-toggles');
   Object.keys(meta).forEach(key => {
     const m = meta[key];
+    const isChecked = activeKeys.includes(key) ? 'checked' : '';
     const div = document.createElement('div');
-    div.innerHTML = `<label class="cursor-pointer block mb-1"><input type="checkbox" class="asset-checkbox hidden" value="${key}" ${activeKeys.includes(key)?'checked':''}><div class="flex items-center p-2 rounded-lg border border-transparent transition-all hover:bg-white" style="color:${m.color}"><span class="w-2 h-2 rounded-full mr-2" style="background-color:${m.color}"></span><span class="font-bold text-[10px] text-slate-700">${m.label}</span></div></label>`;
+    div.innerHTML = `<label class="cursor-pointer block mb-1"><input type="checkbox" class="asset-checkbox hidden" value="${key}" ${isChecked}><div class="flex items-center p-2 rounded-lg border border-transparent transition-all hover:bg-white" style="color:${m.color}"><span class="w-2 h-2 rounded-full mr-2" style="background-color:${m.color}"></span><span class="font-bold text-[10px] text-slate-700">${m.label}</span></div></label>`;
     container.appendChild(div);
   });
   container.addEventListener('change', () => {
@@ -247,7 +239,6 @@ function updateDashboard(mode = 'default') {
       label: meta[key].label,
       data: rawData.map(v => base ? ((v - base) / base) * 100 : 0),
       borderColor: meta[key].color,
-      backgroundColor: meta[key].color,
       borderWidth: 2, pointRadius: 0, tension: 0.1
     };
   });
@@ -267,7 +258,7 @@ function updateRanking(keys, startIdx) {
       <span class="font-bold" style="color:${item.color}">${item.label}</span>
       <span class="font-black ${item.change>=0?'text-emerald-500':'text-rose-500'}">${item.change.toFixed(1)}%</span>
     </div>`).join('');
-
+  
   if(performance.length > 0) {
     document.getElementById('summary-best-name').textContent = performance[0].label;
     document.getElementById('summary-best-val').textContent = performance[0].change.toFixed(1) + '%';
@@ -290,9 +281,8 @@ function setupSimulationListeners() {
       const curVal = totalUnits * data[data.length-1];
       return { label: meta[key].label, color: meta[key].color, currentValue: curVal, profitPerc: ((curVal - totalInv) / totalInv) * 100 };
     }).filter(r => r).sort((a,b) => b.profitPerc - a.profitPerc);
-
     document.getElementById('simulation-results').innerHTML = results.map(r => `
-      <div class="p-2 border rounded bg-white border-l-4" style="border-left-color:${r.color}">
+      <div class="p-2 border rounded bg-white border-l-4 mb-2" style="border-left-color:${r.color}">
         <div class="flex justify-between text-[10px] font-bold"><span>${r.label}</span><span class="${r.profitPerc>=0?'text-emerald-600':'text-rose-600'}">${r.profitPerc.toFixed(1)}%</span></div>
         <div class="text-right font-black text-xs">¥${Math.floor(r.currentValue).toLocaleString()}</div>
       </div>`).join('');
@@ -309,7 +299,7 @@ function renderChart() {
       interaction: { mode: 'nearest', axis: 'x', intersect: false },
       plugins: { legend: { display: false } },
       scales: { x: { grid: { display: false } }, y: { ticks: { callback: v => v + '%' } } },
-      layout: { padding: { right: 120 } } // 銘柄名表示用のスペース
+      layout: { padding: { right: 120 } }
     }
   });
 }
