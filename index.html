@@ -2,177 +2,318 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"> <!-- ズーム許可に修正 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Rational Greed v5.0 - Strategic Asset Simulator</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: #f8fafc; color: #0f172a; -webkit-tap-highlight-color: transparent; }
   .card { background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); padding: 20px; border: 1px solid #e2e8f0; }
-  
   .ranking-scroll::-webkit-scrollbar { width: 4px; }
   .ranking-scroll::-webkit-scrollbar-track { background: transparent; }
   .ranking-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
-
   .asset-checkbox:checked + div { background-color: #f1f5f9; border-color: currentColor; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
-  
-  .warning { background-color: #fee2e2; border-left: 4px solid #ef4444; padding: 12px; margin: 12px 0; border-radius: 8px; }
-  .error { background-color: #fee2e2; padding: 8px; border-radius: 4px; }
+  .period-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); touch-action: manipulation; }
+  .period-btn.active { background-color: #0f172a; color: white; border-color: #0f172a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
+  .simulation-result-card { transition: all 0.3s ease; border-left: 4px solid transparent; }
 </style>
 </head>
-<body class="p-4">
+<body class="p-3 md:p-8 max-w-[1600px] mx-auto bg-slate-50 pb-20">
 
-<div class="max-w-4xl mx-auto space-y-6">
-
-  <!-- 戦略モード選択 -->
-  <div class="card">
-    <h2 class="text-lg font-bold mb-4">戦略モード選択 (v5.0)</h2>
-    <select id="strategyMode" class="w-full p-2 border rounded mb-4">
-      <option value="deepseek">DeepSeek守り (Cash重視)</option>
-      <option value="grok">Grok攻め (需給重視)</option>
-      <option value="gemini">Geminiバランス</option>
-      <option value="custom" selected>カスタム (v5.0推奨)</option>
-    </select>
-    <label><input type="checkbox" id="demandNews"> 需給ニュースあり (Silver/NVIDIA需給爆発)</label>
-  </div>
-
-  <!-- ポートフォリオ入力 -->
-  <div class="card">
-    <h2 class="text-lg font-bold mb-4">ポートフォリオ配分 (%)</h2>
-    <div class="grid grid-cols-2 gap-4">
-      <div><label>NVDA/AVGO</label><input type="number" id="nvda" value="20" class="w-full p-2 border rounded"></div>
-      <div><label>Silver</label><input type="number" id="silver" value="10" class="w-full p-2 border rounded"></div>
-      <div><label>BTC</label><input type="number" id="btc" value="15" class="w-full p-2 border rounded"></div>
-      <div><label>Cash</label><input type="number" id="cash" value="35" class="w-full p-2 border rounded"></div>
-      <div><label>Defense/Software</label><input type="number" id="defense" value="20" class="w-full p-2 border rounded"></div>
+  <!-- ★戦略ポートフォリオ表示エリア -->
+  <div class="card mb-6 p-4 bg-indigo-50 border-l-4 border-indigo-600 text-slate-900 shadow-sm">
+    <div class="flex justify-between items-start mb-4">
+      <h3 class="text-sm font-bold flex items-center">
+        <span class="mr-2 text-indigo-900">📊 2026 Target Portfolio</span>
+        <span class="text-[10px] bg-indigo-200 px-2 py-0.5 rounded text-indigo-800 font-extrabold">Rational Greed v5.0</span>
+      </h3>
+      <div class="text-[10px] text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">戦略: 待機で機会を買い、需給で利益を取る</div>
     </div>
-    <button onclick="updatePortfolio()" class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded">更新</button>
+    <div class="flex flex-col md:flex-row items-center gap-8">
+      <div class="w-40 h-40 relative shrink-0"><canvas id="portfolioChart"></canvas></div>
+      <div class="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
+        <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1"><span class="text-slate-600">Cash</span><span class="font-bold text-emerald-600">35%</span></div>
+        <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1"><span class="text-slate-600">AI Core</span><span class="font-bold text-indigo-600">20%</span></div>
+        <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1"><span class="text-slate-600">AI Satellite</span><span class="font-bold text-cyan-600">20%</span></div>
+        <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1"><span class="text-slate-600">Bitcoin</span><span class="font-bold text-orange-600">15%</span></div>
+        <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1"><span class="text-slate-600">Silver</span><span class="font-bold text-slate-500">10%</span></div>
+      </div>
+    </div>
   </div>
 
-  <!-- 過熱警告 -->
-  <div id="overheatWarning" class="warning hidden">
-    <strong>警告：</strong> RSI > 70の過熱資産あり。FOMO注意。待機推奨。
+  <header class="mb-6 md:mb-10 text-center md:text-left md:flex md:justify-between md:items-end border-b border-slate-200 pb-4 md:pb-6">
+    <div>
+      <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">資産パフォーマンス推移</h1>
+      <p class="text-slate-500 font-medium text-xs md:text-sm">2021.01 - 2025.11 (円建て換算済み)</p>
+    </div>
+    <div class="mt-2 md:mt-0 text-xl font-bold text-slate-700 font-mono hidden md:block">2025.12.25</div>
+  </header>
+
+  <div class="mb-6 overflow-x-auto">
+    <div class="flex gap-2 min-w-max">
+      <button class="period-btn active px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="all">全期間</button>
+      <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2022">2022年〜</button>
+      <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2024">2024年〜</button>
+      <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2025">2025年〜</button>
+    </div>
   </div>
 
-  <!-- エラー表示 -->
-  <div id="errorMessage" class="error hidden"></div>
-
-  <!-- シミュレーション結果 -->
-  <div class="card">
-    <h2 class="text-lg font-bold mb-4">2026年シミュレーション結果</h2>
-    <canvas id="performanceChart" height="400"></canvas>
+  <div class="flex flex-col lg:grid lg:grid-cols-4 gap-6">
+    <div class="lg:col-span-3 order-1 space-y-6">
+      <div class="card h-[55vh] md:h-[650px] relative p-1 md:p-6 w-full">
+        <canvas id="chart"></canvas>
+      </div>
+      <div class="grid grid-cols-3 gap-2 md:gap-4 text-center">
+        <div class="card bg-gradient-to-br from-indigo-50 to-white py-4 px-2">
+          <div class="text-[10px] text-indigo-400 font-bold uppercase mb-1">Top</div>
+          <div id="summary-best-name" class="text-xs md:text-sm font-black text-indigo-900 truncate">-</div>
+          <div id="summary-best-val" class="text-xs font-bold text-indigo-600">-</div>
+        </div>
+        <div class="card bg-white py-4 px-2 text-center">
+          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Avg Change</div>
+          <div id="summary-avg" class="text-sm md:text-lg font-black text-slate-700">-</div>
+        </div>
+        <div class="card bg-white py-4 px-2 text-right">
+          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Bottom</div>
+          <div id="summary-worst-name" class="text-xs md:text-sm font-black text-slate-700 truncate">-</div>
+          <div id="summary-worst-val" class="text-xs font-bold text-slate-500">-</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6 flex items-center"><span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded mr-2">SIM</span> 積立シミュレーション</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <input type="number" id="monthly-amount" value="20000" class="w-full px-4 py-2 border rounded-lg font-medium text-sm">
+          <select id="start-year" class="w-full px-4 py-2 border rounded-lg font-medium text-sm">
+            <option value="2021">2021年</option><option value="2022">2022年</option><option value="2023">2023年</option><option value="2024">2024年</option><option value="2025" selected>2025年</option>
+          </select>
+          <select id="start-month" class="w-full px-4 py-2 border rounded-lg font-medium text-sm">
+            <option value="01" selected>1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option><option value="05">5月</option><option value="06">6月</option><option value="07">7月</option><option value="08">8月</option><option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+          </select>
+          <button id="simulate-btn" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg text-sm">シミュレーション実行</button>
+        </div>
+        <div id="simulation-results" class="space-y-4"></div>
+      </div>
+    </div>
+    <div class="lg:col-span-1 space-y-6 order-2">
+      <div class="card p-4">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">表示銘柄</h3>
+        <div class="grid grid-cols-1 gap-2" id="asset-toggles"></div>
+      </div>
+      <div class="card h-[400px] flex flex-col">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">騰落率ランキング</h3>
+        <div class="flex-1 overflow-y-auto ranking-scroll pr-1 space-y-1" id="ranking-list"></div>
+      </div>
+    </div>
   </div>
-
-</div>
 
 <script>
-// 初期ポートフォリオ
-let portfolio = {
-  nvda: 20,
-  silver: 10,
-  btc: 15,
-  cash: 35,
-  defense: 20
+const db = {
+  SMH: [11861,12834,13431,13232,13694,14382,14387,14887,14342,15574,17349,17766,15871,15509,16461,14904,13063,13919,15792,14131,13369,13984,15531,13304,15468,16317,17529,15533,18476,20353,22615,22822,21656,20719,23597,24660,27392,31931,34050,33465,37744,41941,37731,35564,35056,37026,36258,38020,37541,34918,31639,30420,38379,40303,43093,42137,48496,55869,55009],
+  AVGO: [4716,5006,5115,4968,5191,5321,5323,5466,5428,5723,6301,7656,6753,6790,7684,7189,7413,6636,7134,6924,6413,6949,7645,7330,7633,8101,8545,8541,11295,12558,12648,13484,12406,12546,13611,15742,17389,19593,20058,20325,20851,25829,24533,23798,24630,26010,24271,36398,34097,29917,25050,27388,34969,39841,42468,43722,49023,56886,62922],
+  PLTR: [3683,2546,2569,2509,2522,2914,2381,2896,2691,2946,2350,2095,1580,1370,1675,1349,1109,1239,1379,1071,1174,1299,1041,842,1015,1152,1125,1056,2056,2220,2793,2190,2390,2207,2948,2421,2371,3467,3482,3434,3405,4075,3867,4601,5312,6367,10041,11863,12711,12739,12239,11854,18982,19684,23629,23039,27106,30852,26303],
+  CRWD: [22590,23010,20132,22708,24416,27779,27813,30894,27512,32078,24711,23559,20821,22565,22114,24203,20444,21808,24103,25464,26362,23828,23075,13805,13818,18711,18285,16365,22790,23405,20673,23395,25002,26351,34847,36005,43105,48301,48332,45729,49233,61648,35413,40525,40046,45482,51808,53717,61341,58454,73369,60292,65476,73604,73204,62292,72868,83569,79505],
+  BTC: [3467557,4813675,6507676,6310030,4088027,3891489,4557750,5183873,4875342,6989294,6428337,5319007,4430489,4964484,5540012,4925250,4091192,2705066,3103425,2785170,2811424,3048933,2368041,2169712,3009478,3149604,3779598,3987163,3792091,4397975,4159102,3774683,4026381,5256500,5591733,5961862,6269113,9170140,10792036,9569960,10622342,10096447,9686116,8620933,9095437,10688597,14438361,14707594,14672003,12710027,12374921,13463700,15066900,15436001,17446478,15999985,16864269,16870246,14114830],
+  ITA: [9324,10185,11463,11592,12123,12107,11841,11652,11668,11896,11164,11826,11657,12934,13519,13339,13056,13543,13831,14151,13171,15847,15530,14666,14962,15637,15685,15535,15190,16892,16577,16972,15829,16381,17624,17853,18075,19266,19966,20300,21349,21244,21860,21588,21367,22126,23296,22819,24128,23220,22906,22646,25531,27262,29338,29172,31095,33210,32026],
+  SILVER: [2616,2627,2418,2615,2847,2677,2592,2434,2297,2515,2397,2475,2397,2615,2792,2729,2535,2495,2300,2528,2528,3044,2835,2887,2848,2620,3015,3135,3021,3025,3194,3271,3038,3128,3401,3071,3082,3123,3443,3760,4357,4275,4030,3851,4058,4567,4181,4134,4393,4247,4638,4212,4321,4742,4972,5380,6296,6773,7996],
+  GOLD: [18069,17238,17042,18041,19605,18308,18622,18658,18383,18971,18835,19671,19374,20618,22047,22942,21870,22472,21857,22102,22340,22454,22867,22242,23409,23144,24976,25192,25487,25244,25670,26301,25610,27450,27754,26959,27772,28521,31134,33123,33792,34591,34591,33804,34707,38839,36776,38013,39843,39493,43110,43220,43730,44053,45209,47258,52821,56654,60567],
+  SP500: [13641,14043,15142,15861,15975,16444,16777,17277,16951,18163,18432,19204,17837,17684,19683,18851,18669,18301,19236,19417,18548,20365,19380,18035,18524,19213,19167,19670,20875,22664,22984,23519,22940,22238,23926,24281,26026,27391,28559,28832,29510,31789,29851,29198,29562,32262,32695,34182,33955,31801,30280,28788,30919,32527,34608,34812,36175,38371,38984]
 };
 
-// チャートインスタンス
-let myChart;
-
-// モード別固定配分
-const modes = {
-  deepseek: { nvda: 15, silver: 5, btc: 15, cash: 45, defense: 20 },
-  grok: { nvda: 35, silver: 20, btc: 15, cash: 20, defense: 10 },
-  gemini: { nvda: 25, silver: 15, btc: 15, cash: 30, defense: 15 },
-  custom: null // 入力値使用
+const meta = {
+  SMH:    { label:'AI Semi (SMH)', color:'#4f46e5', type:'stock' },
+  AVGO:   { label:'AI Infra (AVGO)', color:'#1e3a8a', type:'stock' },
+  PLTR:   { label:'AI Data (PLTR)', color:'#a855f7', type:'stock' },
+  CRWD:   { label:'AI Cyber (CRWD)', color:'#06b6d4', type:'stock' },
+  BTC:    { label:'Bitcoin (BTC)', color:'#f97316', type:'crypto' },
+  ITA:    { label:'Defense (ITA)', color:'#eab308', type:'stock' },
+  GOLD:   { label:'Gold (GLD)', color:'#ca8a04', type:'commodity' },
+  SILVER: { label:'Silver (銀)', color:'#64748b', type:'commodity' },
+  SP500:  { label:'S&P 500', color:'#cbd5e1', type:'index' }
 };
 
-// APIキー（実際は自分のキーに置き換え）
-const API_KEY = 'YOUR_ALPHA_VANTAGE_API_KEY'; // 無料取得: https://www.alphavantage.co/support/#api-key
+const labels = [];
+let startY = 2021, startM = 1;
+for (let i = 0; i < 59; i++) {
+  labels.push(`${startY}/${String(startM).padStart(2,'0')}`);
+  startM++;
+  if (startM > 12) { startM = 1; startY++; }
+}
 
-// RSI取得関数
-async function fetchRSI(symbol) {
-  try {
-    const response = await fetch(`https://www.alphavantage.co/query?function=RSI&symbol=${symbol}&interval=daily&time_period=14&apikey=${API_KEY}`);
-    const data = await response.json();
-    const rsiData = data['Technical Analysis: RSI'];
-    const latestDate = Object.keys(rsiData)[0];
-    return parseFloat(rsiData[latestDate]['RSI']);
-  } catch (error) {
-    console.error('API Error:', error);
-    return 0; // エラー時は0として扱う
+let myChart = null;
+let currentPeriod = 'all';
+let activeKeys = ['SMH', 'AVGO', 'PLTR', 'CRWD', 'BTC', 'SILVER']; 
+let selectedAssetKey = null;
+
+// --- PLUGINS ---
+const negativeZonePlugin = {
+  id: 'negativeZone',
+  beforeDraw: (chart) => {
+    const { ctx, chartArea, scales } = chart;
+    const zeroPixel = scales.y.getPixelForValue(0);
+    if (zeroPixel < chartArea.bottom) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(220, 38, 38, 0.05)'; 
+        ctx.fillRect(chartArea.left, zeroPixel, chartArea.width, chartArea.bottom - zeroPixel);
+        ctx.restore();
+    }
+  }
+};
+
+const customLabelPlugin = {
+  id: 'customSmartLabels',
+  afterDatasetsDraw: (chart) => {
+    const { ctx, chartArea, scales } = chart;
+    const isMobile = window.innerWidth < 768;
+    const labelPoints = [];
+
+    chart.data.datasets.forEach((ds, i) => {
+      const meta = chart.getDatasetMeta(i);
+      if (meta.hidden) return;
+      const lastPoint = meta.data[meta.data.length - 1];
+      if (lastPoint && !isNaN(lastPoint.y)) {
+        labelPoints.push({ index: i, y: lastPoint.y, label: ds.label, color: ds.borderColor });
+      }
+    });
+
+    labelPoints.sort((a, b) => a.y - b.y);
+    const labelHeight = isMobile ? 14 : 18;
+    for (let i = 1; i < labelPoints.length; i++) {
+      if (labelPoints[i].y < labelPoints[i-1].y + labelHeight) {
+        labelPoints[i].y = labelPoints[i-1].y + labelHeight;
+      }
+    }
+
+    ctx.save();
+    ctx.font = `bold ${isMobile ? '9px' : '11px'} sans-serif`;
+    labelPoints.forEach(p => {
+      ctx.fillStyle = p.color;
+      ctx.fillText(p.label, chartArea.right + 5, p.y);
+    });
+    ctx.restore();
+  }
+};
+
+function initPortfolioChart() {
+    new Chart(document.getElementById('portfolioChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Cash', 'AI (H+S)', 'Defense', 'BTC', 'Silver'],
+        datasets: [{ data: [35, 20, 20, 15, 10], backgroundColor: ['#10b981', '#4f46e5', '#06b6d4', '#f97316', '#64748b'], borderWidth: 0 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '75%' }
+    });
+}
+
+function init() {
+  initPortfolioChart();
+  createAssetToggles();
+  renderChart();
+  setupSimulationListeners();
+  updateDashboard();
+}
+
+function createAssetToggles() {
+  const container = document.getElementById('asset-toggles');
+  Object.keys(meta).forEach(key => {
+    const m = meta[key];
+    const div = document.createElement('div');
+    div.innerHTML = `<label class="cursor-pointer block mb-1"><input type="checkbox" class="asset-checkbox hidden" value="${key}" ${activeKeys.includes(key)?'checked':''}><div class="flex items-center p-2 rounded-lg border border-transparent transition-all hover:bg-white" style="color:${m.color}"><span class="w-2 h-2 rounded-full mr-2" style="background-color:${m.color}"></span><span class="font-bold text-[10px] text-slate-700">${m.label}</span></div></label>`;
+    container.appendChild(div);
+  });
+  container.addEventListener('change', () => {
+    activeKeys = Array.from(document.querySelectorAll('.asset-checkbox:checked')).map(c => c.value);
+    updateDashboard('none');
+  });
+}
+
+document.querySelectorAll('.period-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    currentPeriod = e.target.dataset.period;
+    updateDashboard();
+  });
+});
+
+function updateDashboard(mode = 'default') {
+  const startIdx = (currentPeriod === 'all') ? 0 : labels.indexOf(`${currentPeriod}/01`);
+  myChart.data.labels = labels.slice(startIdx);
+  myChart.data.datasets = activeKeys.map(key => {
+    const rawData = db[key].slice(startIdx);
+    const base = rawData[0];
+    return {
+      label: meta[key].label,
+      data: rawData.map(v => base ? ((v - base) / base) * 100 : 0),
+      borderColor: meta[key].color,
+      backgroundColor: meta[key].color,
+      borderWidth: 2, pointRadius: 0, tension: 0.1
+    };
+  });
+  myChart.update(mode);
+  updateRanking(activeKeys, startIdx);
+}
+
+function updateRanking(keys, startIdx) {
+  const performance = keys.map(key => {
+    const data = db[key];
+    const change = ((data[data.length-1] - data[startIdx]) / data[startIdx]) * 100;
+    return { label: meta[key].label, color: meta[key].color, change };
+  }).sort((a, b) => b.change - a.change);
+
+  document.getElementById('ranking-list').innerHTML = performance.map(item => `
+    <div class="ranking-item p-2 rounded flex justify-between items-center text-[10px]">
+      <span class="font-bold" style="color:${item.color}">${item.label}</span>
+      <span class="font-black ${item.change>=0?'text-emerald-500':'text-rose-500'}">${item.change.toFixed(1)}%</span>
+    </div>`).join('');
+
+  if(performance.length > 0) {
+    document.getElementById('summary-best-name').textContent = performance[0].label;
+    document.getElementById('summary-best-val').textContent = performance[0].change.toFixed(1) + '%';
+    document.getElementById('summary-worst-name').textContent = performance[performance.length-1].label;
+    document.getElementById('summary-worst-val').textContent = performance[performance.length-1].change.toFixed(1) + '%';
+    document.getElementById('summary-avg').textContent = (performance.reduce((s, p) => s + p.change, 0) / performance.length).toFixed(1) + '%';
   }
 }
 
-// ポートフォリオ更新
-async function updatePortfolio() {
-  // モード選択
-  const mode = document.getElementById('strategyMode').value;
-  if (modes[mode]) {
-    Object.assign(portfolio, modes[mode]);
-  } else {
-    portfolio.nvda = Number(document.getElementById('nvda').value);
-    portfolio.silver = Number(document.getElementById('silver').value);
-    portfolio.btc = Number(document.getElementById('btc').value);
-    portfolio.cash = Number(document.getElementById('cash').value);
-    portfolio.defense = Number(document.getElementById('defense').value);
-  }
+function setupSimulationListeners() {
+  document.getElementById('simulate-btn').addEventListener('click', () => {
+    const amount = parseInt(document.getElementById('monthly-amount').value);
+    const date = document.getElementById('start-year').value + '/' + document.getElementById('start-month').value;
+    const startIdx = labels.indexOf(date);
+    const results = activeKeys.map(key => {
+      const data = db[key];
+      if (startIdx === -1 || startIdx >= data.length) return null;
+      let totalUnits = 0, totalInv = 0;
+      for (let i = startIdx; i < data.length; i++) { totalUnits += amount / data[i]; totalInv += amount; }
+      const curVal = totalUnits * data[data.length-1];
+      return { label: meta[key].label, color: meta[key].color, currentValue: curVal, profitPerc: ((curVal - totalInv) / totalInv) * 100 };
+    }).filter(r => r).sort((a,b) => b.profitPerc - a.profitPerc);
 
-  const sum = portfolio.nvda + portfolio.silver + portfolio.btc + portfolio.cash + portfolio.defense;
-  if (sum !== 100) {
-    document.getElementById('errorMessage').textContent = `配分合計が100%ではありません: ${sum}%`;
-    document.getElementById('errorMessage').classList.remove('hidden');
-    return;
-  } else {
-    document.getElementById('errorMessage').classList.add('hidden');
-  }
-
-  // 需給ニュースONでSilver/NVIDIAアップ
-  if (document.getElementById('demandNews').checked) {
-    portfolio.silver = Math.min(20, portfolio.silver + 5);
-    portfolio.nvda = Math.min(30, portfolio.nvda + 5);
-    portfolio.cash = 100 - (portfolio.nvda + portfolio.silver + portfolio.btc + portfolio.defense);
-  }
-
-  // 過熱警告 (API連携)
-  const rsiSilver = await fetchRSI('SLV'); // Silver ETF
-  if (rsiSilver > 70) {
-    document.getElementById('overheatWarning').classList.remove('hidden');
-  } else {
-    document.getElementById('overheatWarning').classList.add('hidden');
-  }
-
-  // チャート更新（ダミーデータ例、実際はシミュレーション関数に置き換え）
-  updateChart();
+    document.getElementById('simulation-results').innerHTML = results.map(r => `
+      <div class="p-2 border rounded bg-white border-l-4" style="border-left-color:${r.color}">
+        <div class="flex justify-between text-[10px] font-bold"><span>${r.label}</span><span class="${r.profitPerc>=0?'text-emerald-600':'text-rose-600'}">${r.profitPerc.toFixed(1)}%</span></div>
+        <div class="text-right font-black text-xs">¥${Math.floor(r.currentValue).toLocaleString()}</div>
+      </div>`).join('');
+  });
 }
 
-// チャート更新 (ダミー)
-function updateChart() {
-  const ctx = document.getElementById('performanceChart').getContext('2d');
-  if (myChart) myChart.destroy();
-  myChart = new Chart(ctx, {
+function renderChart() {
+  myChart = new Chart(document.getElementById('chart'), {
     type: 'line',
-    data: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-      datasets: [{
-        label: 'Portfolio Performance',
-        data: [5, 10, 8, 15, 12, 20, 18, 25, 22, 30, 28, 35], // ダミー: 実際はシミュ計算
-        borderColor: '#6366f1',
-        tension: 0.1
-      }]
-    },
+    data: { labels: [], datasets: [] },
+    plugins: [negativeZonePlugin, customLabelPlugin],
     options: {
-      responsive: true,
-      scales: { y: { ticks: { callback: v => v + '%' } } }
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'nearest', axis: 'x', intersect: false },
+      plugins: { legend: { display: false } },
+      scales: { x: { grid: { display: false } }, y: { ticks: { callback: v => v + '%' } } },
+      layout: { padding: { right: 120 } } // 銘柄名表示用のスペース
     }
   });
 }
 
-// 初期化
-window.onload = async () => {
-  updatePortfolio();
-};
+init();
 </script>
 </body>
 </html>
