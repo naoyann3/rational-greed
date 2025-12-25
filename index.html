@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Rational Greed v3.1 - Asset Simulator</title>
+<title>Rational Greed v5.0 - Strategic Asset Simulator</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
@@ -11,64 +11,54 @@
 <style>
   body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: #f8fafc; color: #0f172a; -webkit-tap-highlight-color: transparent; }
   .card { background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); padding: 20px; border: 1px solid #e2e8f0; }
-  
   .ranking-scroll::-webkit-scrollbar { width: 4px; }
   .ranking-scroll::-webkit-scrollbar-track { background: transparent; }
   .ranking-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
-
   .asset-checkbox:checked + div { background-color: #f1f5f9; border-color: currentColor; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
-  
   .period-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); touch-action: manipulation; }
   .period-btn.active { background-color: #0f172a; color: white; border-color: #0f172a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
-  
   .ranking-item { transition: transform 0.2s ease, background-color 0.2s; cursor: pointer; border-left: 4px solid transparent; }
   .ranking-item:hover { transform: translateX(4px); background-color: #f8fafc; }
   .ranking-item.active-highlight { background-color: #f1f5f9; border-left-color: currentColor; }
-
   .simulation-result-card { transition: all 0.3s ease; border-left: 4px solid transparent; }
   .simulation-result-card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05); }
 </style>
 </head>
 <body class="p-3 md:p-8 max-w-[1600px] mx-auto bg-slate-50 pb-20">
 
-  <!-- ★戦略ポートフォリオ表示エリア (Rational Greed v3.1) -->
+  <!-- ★戦略ポートフォリオ表示エリア (Rational Greed v5.0) -->
   <div class="card mb-6 p-4 bg-indigo-50 border-l-4 border-indigo-600 text-slate-900 shadow-sm">
     <div class="flex justify-between items-start mb-4">
       <h3 class="text-sm font-bold flex items-center">
         <span class="mr-2 text-indigo-900">📊 2026 Target Portfolio</span>
-        <span class="text-[10px] bg-indigo-200 px-2 py-0.5 rounded text-indigo-800 font-extrabold">Rational Greed v3.1</span>
+        <span class="text-[10px] bg-indigo-200 px-2 py-0.5 rounded text-indigo-800 font-extrabold">Rational Greed v5.0</span>
       </h3>
       <div class="text-[10px] text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">
-        戦略: 待つことが最強の攻撃
+        戦略: 理性の檻で野性を飼い慣らす
       </div>
     </div>
     
     <div class="flex flex-col md:flex-row items-center gap-8">
-      <!-- 円グラフ -->
       <div class="w-40 h-40 relative shrink-0">
         <canvas id="portfolioChart"></canvas>
-        <div class="absolute inset-0 flex items-center justify-center flex-col pointer-events-none">
-          <span class="text-[10px] text-slate-400">Total Strategy</span>
-        </div>
       </div>
       
-      <!-- 配分リスト -->
       <div class="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
         <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1">
           <span class="text-slate-600 font-medium">Cash (円/ドル)</span>
           <span class="font-bold text-emerald-600">35%</span>
         </div>
         <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1">
-          <span class="text-slate-600 font-medium">AIセクター (ETF)</span>
+          <span class="text-slate-600 font-medium">AI (Hard+Soft)</span>
           <span class="font-bold text-indigo-600">20%</span>
+        </div>
+        <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1">
+          <span class="text-slate-600 font-medium">Defense/Software</span>
+          <span class="font-bold text-cyan-600">20%</span>
         </div>
         <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1">
           <span class="text-slate-600 font-medium">Bitcoin (BTC)</span>
           <span class="font-bold text-orange-600">15%</span>
-        </div>
-        <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1">
-          <span class="text-slate-600 font-medium">Gold/Defense</span>
-          <span class="font-bold text-yellow-600">20%</span>
         </div>
         <div class="flex justify-between items-center border-b border-indigo-200/50 pb-1">
           <span class="text-slate-600 font-medium">Silver (銀)</span>
@@ -80,142 +70,81 @@
 
   <header class="mb-6 md:mb-10 text-center md:text-left md:flex md:justify-between md:items-end border-b border-slate-200 pb-4 md:pb-6">
     <div>
-      <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">
-        資産パフォーマンス推移
-      </h1>
-      <div class="flex flex-col items-center md:items-start gap-1">
-        <p class="text-slate-500 font-medium flex flex-col md:flex-row items-center md:items-start justify-center md:justify-start gap-1 md:gap-2 text-xs md:text-sm">
-          <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-[10px] md:text-xs font-bold">円建て換算</span>
-          <span>2021.01 - 2025.11 (為替レート反映済み)</span>
-        </p>
-      </div>
+      <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">資産パフォーマンス推移</h1>
+      <p class="text-slate-500 font-medium text-xs md:text-sm">
+        <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-[10px] md:text-xs font-bold">円建て換算</span>
+        <span>2021.01 - 2025.11 (為替・株式分割反映済み)</span>
+      </p>
     </div>
-    <div class="mt-2 md:mt-0 text-right hidden md:block">
-      <div class="text-[10px] text-slate-400 font-mono tracking-widest uppercase mb-1">最終更新日</div>
-      <div class="text-xl font-bold text-slate-700 font-mono">2025.12.25</div>
-    </div>
+    <div class="mt-2 md:mt-0 text-right hidden md:block text-xl font-bold text-slate-700 font-mono">2025.12.25</div>
   </header>
 
-  <!-- 期間選択ボタン -->
-  <div class="mb-6">
-    <div class="overflow-x-auto pb-2 -mx-3 px-3 md:mx-0 md:px-0 md:overflow-visible scroll-fade-right">
-      <div class="flex md:flex-wrap gap-2 md:gap-4 min-w-max md:min-w-0">
-        <button class="period-btn active px-4 py-2 rounded-full border border-slate-200 font-bold text-xs md:text-sm whitespace-nowrap" data-period="all">全期間</button>
-        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs md:text-sm whitespace-nowrap" data-period="2021">2021年〜</button>
-        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs md:text-sm whitespace-nowrap" data-period="2022">2022年〜</button>
-        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs md:text-sm whitespace-nowrap" data-period="2023">2023年〜</button>
-        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs md:text-sm whitespace-nowrap" data-period="2024">2024年〜</button>
-        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs md:text-sm whitespace-nowrap" data-period="2025">2025年〜</button>
-      </div>
+  <!-- 期間選択 -->
+  <div class="mb-6 overflow-x-auto">
+    <div class="flex gap-2 min-w-max">
+      <button class="period-btn active px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="all">全期間</button>
+      <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2022">2022年〜</button>
+      <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2024">2024年〜</button>
+      <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2025">2025年〜</button>
     </div>
   </div>
 
   <div class="flex flex-col lg:grid lg:grid-cols-4 gap-6">
-    <!-- メインチャートエリア -->
     <div class="lg:col-span-3 order-1 space-y-6">
       <div class="card h-[55vh] md:h-[650px] relative p-1 md:p-6 w-full">
         <canvas id="chart"></canvas>
       </div>
       
       <div class="grid grid-cols-3 gap-2 md:gap-4">
-        <div class="card bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 flex flex-col justify-center py-2 md:py-4 px-2 md:px-6 text-center md:text-left">
-          <div class="text-[8px] md:text-[10px] text-indigo-400 font-bold uppercase mb-1 tracking-wider">Top Asset</div>
-          <div class="flex flex-col md:flex-row items-center md:items-baseline gap-0 md:gap-2">
-            <div class="text-sm md:text-2xl font-black text-indigo-900 truncate w-full" id="summary-best-name">-</div>
-            <div class="text-[10px] md:text-sm font-bold text-indigo-600" id="summary-best-val">-</div>
-          </div>
+        <div class="card bg-gradient-to-br from-indigo-50 to-white py-4 px-6">
+          <div class="text-[10px] text-indigo-400 font-bold uppercase mb-1">Top Asset</div>
+          <div id="summary-best-name" class="text-sm md:text-xl font-black text-indigo-900 truncate">-</div>
+          <div id="summary-best-val" class="text-xs font-bold text-indigo-600">-</div>
         </div>
-        <div class="card bg-white border border-slate-100 flex flex-col justify-center py-2 md:py-4 px-2 md:px-6 text-center md:text-left">
-          <div class="text-[8px] md:text-[10px] text-slate-400 font-bold uppercase mb-1 tracking-wider">Average</div>
-          <div class="text-sm md:text-2xl font-black text-slate-700" id="summary-avg">-</div>
+        <div class="card bg-white py-4 px-6 text-center">
+          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Average</div>
+          <div id="summary-avg" class="text-sm md:text-xl font-black text-slate-700">-</div>
         </div>
-        <div class="card bg-white border border-slate-100 flex flex-col justify-center py-2 md:py-4 px-2 md:px-6 text-center md:text-left">
-          <div class="text-[8px] md:text-[10px] text-slate-400 font-bold uppercase mb-1 tracking-wider">Bottom Asset</div>
-          <div class="flex flex-col md:flex-row items-center md:items-baseline gap-0 md:gap-2">
-             <div class="text-sm md:text-2xl font-black text-slate-700 truncate w-full" id="summary-worst-name">-</div>
-             <div class="text-[10px] md:text-sm font-bold text-slate-500" id="summary-worst-val">-</div>
-          </div>
+        <div class="card bg-white py-4 px-6 text-right">
+          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Bottom Asset</div>
+          <div id="summary-worst-name" class="text-sm md:text-xl font-black text-slate-700 truncate">-</div>
+          <div id="summary-worst-val" class="text-xs font-bold text-slate-500">-</div>
         </div>
       </div>
-      
-      <!-- 積立投資シミュレーション -->
-      <div class="card mt-6">
+
+      <div class="card">
         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6 flex items-center">
           <span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded mr-2">SIM</span>
-          積立投資シミュレーション
+          積立投資シミュレーション (円建て)
         </h3>
-        
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">月々の積立額（円）</label>
-            <input type="number" id="monthly-amount" value="20000" min="1000" step="1000" 
-                   class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 font-medium">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">積立開始年</label>
-            <select id="start-year" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 font-medium">
-              <option value="2021">2021年</option>
-              <option value="2022">2022年</option>
-              <option value="2023">2023年</option>
-              <option value="2024">2024年</option>
-              <option value="2025" selected>2025年</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">積立開始月</label>
-            <select id="start-month" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 font-medium">
-              <option value="01" selected>1月</option>
-              <option value="02">2月</option>
-              <option value="03">3月</option>
-              <option value="04">4月</option>
-              <option value="05">5月</option>
-              <option value="06">6月</option>
-              <option value="07">7月</option>
-              <option value="08">8月</option>
-              <option value="09">9月</option>
-              <option value="10">10月</option>
-              <option value="11">11月</option>
-              <option value="12">12月</option>
-            </select>
-          </div>
-          <div class="flex items-end">
-            <button id="simulate-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-lg transition duration-200 flex items-center justify-center">
-              実行
-            </button>
-          </div>
+          <input type="number" id="monthly-amount" value="20000" class="w-full px-4 py-2 border rounded-lg font-medium">
+          <select id="start-year" class="w-full px-4 py-2 border rounded-lg font-medium">
+            <option value="2021">2021年</option>
+            <option value="2022">2022年</option>
+            <option value="2023">2023年</option>
+            <option value="2024">2024年</option>
+            <option value="2025" selected>2025年</option>
+          </select>
+          <select id="start-month" class="w-full px-4 py-2 border rounded-lg font-medium">
+            <option value="01" selected>1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option>
+            <option value="05">5月</option><option value="06">6月</option><option value="07">7月</option><option value="08">8月</option>
+            <option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+          </select>
+          <button id="simulate-btn" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg">実行</button>
         </div>
-        
-        <div id="simulation-results" class="space-y-4">
-          <div class="text-center py-10 text-slate-400">
-            <p class="font-medium">設定を入力して「実行」をクリックしてください</p>
-          </div>
-        </div>
+        <div id="simulation-results" class="space-y-4"></div>
       </div>
     </div>
 
     <!-- サイドバー -->
     <div class="lg:col-span-1 space-y-6 order-2">
-      <div class="card p-0 overflow-hidden">
-        <details class="group" open>
-          <summary class="flex justify-between items-center p-4 md:p-6 bg-white cursor-pointer hover:bg-slate-50 transition">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">表示銘柄の選択</h3>
-            <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
-          </summary>
-          <div class="px-4 pb-4 md:px-6 md:pb-6 border-t border-slate-100 pt-4">
-            <div class="flex justify-end gap-2 mb-3">
-              <button id="btn-select-all" class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full">全選択</button>
-              <button id="btn-select-none" class="text-[10px] font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full">解除</button>
-            </div>
-            <div class="grid grid-cols-2 gap-2" id="asset-toggles"></div>
-          </div>
-        </details>
+      <div class="card p-4">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">表示銘柄の選択</h3>
+        <div class="grid grid-cols-1 gap-2" id="asset-toggles"></div>
       </div>
-
-      <div class="card h-[400px] lg:h-[calc(100vh-450px)] min-h-[300px] flex flex-col">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex justify-between items-center">
-          <span>騰落率ランキング</span>
-          <span class="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-500" id="ranking-period-label">全期間</span>
-        </h3>
+      <div class="card h-[400px] flex flex-col">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">騰落率ランキング</h3>
         <div class="flex-1 overflow-y-auto ranking-scroll pr-1 space-y-1" id="ranking-list"></div>
       </div>
     </div>
@@ -226,62 +155,39 @@
 //  データ定義 (2021/01 - 2025/11) : 円建て換算済み (Real Data)
 // =========================================================
 const db = {
-  // --- Rational Greed v3.1 Target Assets (USD ETF * USD/JPY) ---
+  // AIハード (SMH)
+  SMH: [11861,12834,13431,13232,13694,14382,14387,14887,14342,15574,17349,17766,15871,15509,16461,14904,13063,13919,15792,14131,13369,13984,15531,13304,15468,16317,17529,15533,18476,20353,22615,22822,21656,20719,23597,24660,27392,31931,34050,33465,37744,41941,37731,35564,35056,37026,36258,38020,37541,34918,31639,30420,38379,40303,43093,42137,48496,55869,55009],
   
-  // AIセクター (SMH * USDJPY)
-  SMH: [
-    11861,12834,13431,13232,13694,14382,14387,14887,14342,15574,17349,17766, // 2021
-    15871,15509,16461,14904,13063,13919,15792,14131,13369,13984,15531,13304, // 2022
-    15468,16317,17529,15533,18476,20353,22615,22822,21656,20719,23597,24660, // 2023
-    27392,31931,34050,33465,37744,41941,37731,35564,35056,37026,36258,38020, // 2024
-    37541,34918,31639,30420,38379,40303,43093,42137,48496,55869,55009        // 2025
-  ],
-
-  // 防衛セクター (ITA * USDJPY)
-  ITA: [
-    9324,10185,11463,11592,12123,12107,11841,11652,11668,11896,11164,11826, // 2021
-    11657,12934,13519,13339,13056,13543,13831,14151,13171,15847,15530,14666, // 2022
-    14962,15637,15685,15535,15190,16892,16577,16972,15829,16381,17624,17853, // 2023
-    18075,19266,19966,20300,21349,21244,21860,21588,21367,22126,23296,22819, // 2024
-    24128,23220,22906,22646,25531,27262,29338,29172,31095,33210,32026        // 2025
-  ],
-
-  // 金ETF (GLD * USDJPY)
-  GLD: [
-    18069,17238,17042,18041,19605,18308,18622,18658,18383,18971,18835,19671, // 2021
-    19374,20618,22047,22942,21870,22472,21857,22102,22340,22454,22867,22242, // 2022
-    23409,23144,24976,25192,25487,25244,25670,26301,25610,27450,27754,26959, // 2023
-    27772,28521,31134,33123,33792,34591,34591,33804,34707,38839,36776,38013, // 2024
-    39843,39493,43110,43220,43730,44053,45209,47258,52821,56654,60567        // 2025
-  ],
-
-  // 銀ETF (SLV * USDJPY)
-  SILVER: [
-    2616,2627,2418,2615,2847,2677,2592,2434,2297,2515,2397,2475, // 2021
-    2397,2615,2792,2729,2535,2495,2300,2528,2528,3044,2835,2887, // 2022
-    2848,2620,3015,3135,3021,3025,3194,3271,3038,3128,3401,3071, // 2023
-    3082,3123,3443,3760,4357,4275,4030,3851,4058,4567,4181,4134, // 2024
-    4393,4247,4638,4212,4321,4742,4972,5380,6296,6773,7996       // 2025
-  ],
-
-  // --- Reference (比較用) ---
+  // AIソフト1 (CRWD)
+  CRWD: [22590,23010,20132,22708,24416,27779,27813,30894,27512,32078,24711,23559,20821,22565,22114,24203,20444,21808,24103,25464,26362,23828,23075,13805,13818,18711,18285,16365,22790,23405,20673,23395,25002,26351,34847,36005,43105,48301,48332,45729,49233,61648,35413,40525,40046,45482,51808,53717,61341,58454,73369,60292,65476,73604,73204,62292,72868,83569,79505],
+  
+  // AIソフト2 (PLTR)
+  PLTR: [3683,2546,2569,2509,2522,2914,2381,2896,2691,2946,2350,2095,1580,1370,1675,1349,1109,1239,1379,1071,1174,1299,1041,842,1015,1152,1125,1056,2056,2220,2793,2190,2390,2207,2948,2421,2371,3467,3482,3434,3405,4075,3867,4601,5312,6367,10041,11863,12711,12739,12239,11854,18982,19684,23629,23039,27106,30852,26303],
+  
+  // 仮想通貨 (BTC)
   BTC: [3467557,4813675,6507676,6310030,4088027,3891489,4557750,5183873,4875342,6989294,6428337,5319007,4430489,4964484,5540012,4925250,4091192,2705066,3103425,2785170,2811424,3048933,2368041,2169712,3009478,3149604,3779598,3987163,3792091,4397975,4159102,3774683,4026381,5256500,5591733,5961862,6269113,9170140,10792036,9569960,10622342,10096447,9686116,8620933,9095437,10688597,14438361,14707594,14672003,12710027,12374921,13463700,15066900,15436001,17446478,15999985,16864269,16870246,14114830],
-  
+
+  // 防衛 (ITA)
+  ITA: [9324,10185,11463,11592,12123,12107,11841,11652,11668,11896,11164,11826,11657,12934,13519,13339,13056,13543,13831,14151,13171,15847,15530,14666,14962,15637,15685,15535,15190,16892,16577,16972,15829,16381,17624,17853,18075,19266,19966,20300,21349,21244,21860,21588,21367,22126,23296,22819,24128,23220,22906,22646,25531,27262,29338,29172,31095,33210,32026],
+
+  // 銀 (SLV)
+  SILVER: [2616,2627,2418,2615,2847,2677,2592,2434,2297,2515,2397,2475,2397,2615,2792,2729,2535,2495,2300,2528,2528,3044,2835,2887,2848,2620,3015,3135,3021,3025,3194,3271,3038,3128,3401,3071,3082,3123,3443,3760,4357,4275,4030,3851,4058,4567,4181,4134,4393,4247,4638,4212,4321,4742,4972,5380,6296,6773,7996],
+
+  // 金 (GLD)
+  GOLD: [18069,17238,17042,18041,19605,18308,18622,18658,18383,18971,18835,19671,19374,20618,22047,22942,21870,22472,21857,22102,22340,22454,22867,22242,23409,23144,24976,25192,25487,25244,25670,26301,25610,27450,27754,26959,27772,28521,31134,33123,33792,34591,34591,33804,34707,38839,36776,38013,39843,39493,43110,43220,43730,44053,45209,47258,52821,56654,60567],
+
+  // 指標 (SP500)
   SP500: [13641,14043,15142,15861,15975,16444,16777,17277,16951,18163,18432,19204,17837,17684,19683,18851,18669,18301,19236,19417,18548,20365,19380,18035,18524,19213,19167,19670,20875,22664,22984,23519,22940,22238,23926,24281,26026,27391,28559,28832,29510,31789,29851,29198,29562,32262,32695,34182,33955,31801,30280,28788,30919,32527,34608,34812,36175,38371,38984]
 };
 
-// =========================================================
-//  ★戦略設定: Rational Greed v3.1
-// =========================================================
 const meta = {
-  // 戦略コア資産
-  SMH:    { label:'AI Semi (SMH)', color:'#4f46e5', type:'stock' }, // Indigo
-  BTC:    { label:'Bitcoin (BTC)', color:'#f97316', type:'crypto' }, // Orange
-  ITA:    { label:'Defense (ITA)', color:'#eab308', type:'stock' }, // Yellow
-  GLD:    { label:'Gold (GLD)',    color:'#ca8a04', type:'commodity' }, // Dark Yellow
-  SILVER: { label:'Silver (銀)',   color:'#64748b', type:'commodity' }, // Slate
-  
-  // 比較用
+  SMH:    { label:'AI Semi (SMH)', color:'#4f46e5', type:'stock' },
+  PLTR:   { label:'AI Data (PLTR)', color:'#a855f7', type:'stock' },
+  CRWD:   { label:'AI Cyber (CRWD)', color:'#06b6d4', type:'stock' },
+  BTC:    { label:'Bitcoin (BTC)', color:'#f97316', type:'crypto' },
+  ITA:    { label:'Defense (ITA)', color:'#eab308', type:'stock' },
+  GOLD:   { label:'Gold (GLD)', color:'#ca8a04', type:'commodity' },
+  SILVER: { label:'Silver (銀)', color:'#64748b', type:'commodity' },
   SP500:  { label:'S&P 500', color:'#cbd5e1', type:'index' }
 };
 
@@ -295,194 +201,28 @@ for (let i = 0; i < 59; i++) {
 
 let myChart = null;
 let currentPeriod = 'all';
-// 初期表示で「戦略銘柄」のみをアクティブにする
-let activeKeys = ['SMH', 'BTC', 'ITA', 'GLD', 'SILVER']; 
+let activeKeys = ['SMH', 'PLTR', 'CRWD', 'BTC', 'SILVER']; 
 let selectedAssetKey = null;
 
 // =========================================================
-//  円グラフ (Portfolio) の描画ロジック
+//  UI & Chart Logic
 // =========================================================
+
 function initPortfolioChart() {
     const ctxP = document.getElementById('portfolioChart').getContext('2d');
     new Chart(ctxP, {
       type: 'doughnut',
       data: {
-        labels: ['Cash', 'AI', 'BTC', 'Gold/Def', 'Silver'],
+        labels: ['Cash', 'AI (H+S)', 'Defense', 'BTC', 'Silver'],
         datasets: [{
-          data: [45, 25, 15, 10, 5],
-          backgroundColor: ['#059669', '#4f46e5', '#f97316', '#eab308', '#64748b'],
+          data: [35, 20, 20, 15, 10],
+          backgroundColor: ['#10b981', '#4f46e5', '#06b6d4', '#f97316', '#64748b'],
           borderWidth: 0
         }]
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: true }
-        },
-        cutout: '70%'
-      }
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '75%' }
     });
 }
-
-// =========================================================
-//  シミュレーション系ロジック
-// =========================================================
-
-function calculateMonthlyInvestment(assetKey, monthlyAmount, startDate) {
-  const data = db[assetKey];
-  const startIndex = labels.indexOf(startDate);
-  if (startIndex === -1 || startIndex >= data.length) return null;
-  
-  let totalUnits = 0;
-  let totalInvestment = 0;
-  
-  for (let i = startIndex; i < data.length; i++) {
-    const price = data[i];
-    const unitsBought = monthlyAmount / price;
-    totalUnits += unitsBought;
-    totalInvestment += monthlyAmount;
-  }
-  
-  const currentValue = totalUnits * data[data.length - 1];
-  const profit = currentValue - totalInvestment;
-  const profitPercentage = (profit / totalInvestment) * 100;
-  const investmentMonths = data.length - startIndex;
-  
-  return {
-    totalInvestment,
-    currentValue,
-    profit,
-    profitPercentage,
-    totalUnits,
-    finalPrice: data[data.length - 1],
-    investmentMonths,
-    assetKey
-  };
-}
-
-function runAllSimulations(monthlyAmount, startDate) {
-  const results = {};
-  activeKeys.forEach(key => {
-    const result = calculateMonthlyInvestment(key, monthlyAmount, startDate);
-    if (result) {
-      results[key] = {
-        ...result,
-        label: meta[key].label,
-        color: meta[key].color
-      };
-    }
-  });
-  return results;
-}
-
-function displaySimulationResults(results) {
-  const container = document.getElementById('simulation-results');
-  container.innerHTML = '';
-  
-  if (Object.keys(results).length === 0) {
-    container.innerHTML = `
-      <div class="text-center py-10 text-slate-500">
-        <p class="font-medium">選択された資産がありません</p>
-        <p class="text-sm mt-1">左のパネルで資産を選択してください</p>
-      </div>
-    `;
-    return;
-  }
-  
-  const sortedResults = Object.entries(results).sort((a, b) => {
-    return b[1].profitPercentage - a[1].profitPercentage;
-  });
-  
-  const monthlyAmount = document.getElementById('monthly-amount').value;
-  const startYear = document.getElementById('start-year').value;
-  const startMonth = document.getElementById('start-month').value;
-  
-  const summaryCard = document.createElement('div');
-  summaryCard.className = 'bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-6';
-  summaryCard.innerHTML = `
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
-      <div>
-        <h4 class="font-bold text-slate-900 text-sm mb-1">シミュレーション設定</h4>
-        <div class="flex flex-wrap gap-3 text-sm text-slate-600">
-          <div class="flex items-center">
-            <span class="font-medium">月々積立額:</span>
-            <span class="ml-2 font-bold">¥${parseInt(monthlyAmount).toLocaleString()}</span>
-          </div>
-          <div class="flex items-center">
-            <span class="font-medium">開始時期:</span>
-            <span class="ml-2 font-bold">${startYear}年${parseInt(startMonth)}月</span>
-          </div>
-        </div>
-      </div>
-      <button id="reset-simulation" class="mt-3 md:mt-0 text-xs font-bold text-indigo-600 bg-white px-3 py-2 rounded-lg border border-indigo-200 hover:bg-indigo-50 transition">
-        リセット
-      </button>
-    </div>
-  `;
-  container.appendChild(summaryCard);
-  
-  document.getElementById('reset-simulation').addEventListener('click', function() {
-    document.getElementById('monthly-amount').value = 20000;
-    document.getElementById('start-year').value = '2025';
-    document.getElementById('start-month').value = '01';
-    container.innerHTML = `
-      <div class="text-center py-10 text-slate-400">
-        <p class="font-medium">結果がここに表示されます</p>
-        <p class="text-sm mt-1">設定を入力して「実行」をクリックしてください</p>
-      </div>
-    `;
-  });
-  
-  sortedResults.forEach(([key, result], index) => {
-    const card = document.createElement('div');
-    card.className = `simulation-result-card p-5 border border-slate-200 rounded-xl bg-white ${result.profit >= 0 ? 'border-l-emerald-500' : 'border-l-rose-500'}`;
-    card.style.borderLeftColor = result.color;
-    card.innerHTML = `
-      <div class="flex items-start justify-between mb-4">
-        <div class="flex items-center">
-          <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3" style="background-color:${result.color}">
-            ${index + 1}
-          </div>
-          <div>
-            <div class="flex items-center">
-              <span class="font-bold text-slate-900 text-lg">${result.label}</span>
-              <span class="ml-2 text-xs font-medium px-2 py-1 rounded-full ${result.profitPercentage >= 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
-                ${result.profitPercentage >= 0 ? '+' : ''}${result.profitPercentage.toFixed(1)}%
-              </span>
-            </div>
-            <div class="text-xs text-slate-500 mt-1">${result.investmentMonths}ヶ月間の積立</div>
-          </div>
-        </div>
-        <div class="text-right">
-          <div class="text-xs text-slate-500">現在価値</div>
-          <div class="font-black text-xl ${result.profit >= 0 ? 'text-emerald-600' : 'text-rose-600'}">
-            ¥${result.currentValue.toLocaleString()}
-          </div>
-        </div>
-      </div>
-      
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-        <div class="bg-slate-50 p-2 rounded">
-          <div class="text-xs text-slate-500">投資総額</div>
-          <div class="font-bold text-slate-900">¥${result.totalInvestment.toLocaleString()}</div>
-        </div>
-        <div class="bg-slate-50 p-2 rounded">
-          <div class="text-xs text-slate-500">損益額</div>
-          <div class="font-bold ${result.profit >= 0 ? 'text-emerald-600' : 'text-rose-600'}">
-            ¥${result.profit >= 0 ? '+' : ''}${result.profit.toLocaleString()}
-          </div>
-        </div>
-      </div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-// =========================================================
-//  Main Chart Logic
-// =========================================================
 
 function init() {
   initPortfolioChart();
@@ -499,15 +239,7 @@ function createAssetToggles() {
     const m = meta[key];
     const isChecked = activeKeys.includes(key) ? 'checked' : '';
     const div = document.createElement('div');
-    div.innerHTML = `
-      <label class="cursor-pointer group block">
-        <input type="checkbox" class="asset-checkbox hidden" value="${key}" ${isChecked}>
-        <div class="flex items-center p-2 rounded-lg border border-transparent transition-all hover:bg-white hover:shadow-sm" style="color:${m.color}">
-          <span class="w-3 h-3 rounded-full mr-2" style="background-color:${m.color}"></span>
-          <span class="font-bold text-sm text-slate-700 group-hover:text-slate-900">${m.label}</span>
-        </div>
-      </label>
-    `;
+    div.innerHTML = `<label class="cursor-pointer block"><input type="checkbox" class="asset-checkbox hidden" value="${key}" ${isChecked}><div class="flex items-center p-2 rounded-lg border border-transparent transition-all hover:bg-white" style="color:${m.color}"><span class="w-3 h-3 rounded-full mr-2" style="background-color:${m.color}"></span><span class="font-bold text-xs text-slate-700">${m.label}</span></div></label>`;
     container.appendChild(div);
   });
 }
@@ -521,290 +253,96 @@ function setupEventListeners() {
       updateDashboard();
     });
   });
-
-  document.getElementById('asset-toggles').addEventListener('change', (e) => {
-    if (e.target.classList.contains('asset-checkbox')) {
-      activeKeys = Array.from(document.querySelectorAll('.asset-checkbox:checked')).map(c => c.value);
-      if (selectedAssetKey && !activeKeys.includes(selectedAssetKey)) {
-        selectedAssetKey = null;
-      }
-      updateDashboard('none');
-    }
-  });
-
-  document.getElementById('btn-select-all').addEventListener('click', () => {
-    document.querySelectorAll('.asset-checkbox').forEach(c => c.checked = true);
-    activeKeys = Object.keys(db);
+  document.getElementById('asset-toggles').addEventListener('change', () => {
+    activeKeys = Array.from(document.querySelectorAll('.asset-checkbox:checked')).map(c => c.value);
     updateDashboard('none');
   });
-  document.getElementById('btn-select-none').addEventListener('click', () => {
-    document.querySelectorAll('.asset-checkbox').forEach(c => c.checked = false);
-    activeKeys = [];
-    selectedAssetKey = null;
-    updateDashboard('none');
-  });
-  
-  document.getElementById('chart').addEventListener('mouseleave', () => {
-    if(!selectedAssetKey) updateDashboard('none'); 
-  });
-}
-
-function setupSimulationListeners() {
-  const simulateBtn = document.getElementById('simulate-btn');
-  if (simulateBtn) {
-    simulateBtn.addEventListener('click', function() {
-      const monthlyAmount = parseInt(document.getElementById('monthly-amount').value);
-      const startYear = document.getElementById('start-year').value;
-      const startMonth = document.getElementById('start-month').value;
-      
-      if (!monthlyAmount || monthlyAmount < 1000 || monthlyAmount > 10000000) {
-        alert('月々の積立額は1,000円〜10,000,000円の範囲で入力してください');
-        return;
-      }
-      const startDate = `${startYear}/${startMonth}`;
-      if (labels.indexOf(startDate) === -1 || labels.indexOf(startDate) >= labels.length) {
-        alert('選択した開始日はデータ範囲外です。');
-        return;
-      }
-      const results = runAllSimulations(monthlyAmount, startDate);
-      displaySimulationResults(results);
-      document.getElementById('simulation-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  }
-}
-
-function getStartIndex() {
-  if (currentPeriod === 'all') return 0;
-  const target = `${currentPeriod}/01`;
-  return labels.indexOf(target);
 }
 
 function updateDashboard(mode = 'default') {
-  const startIdx = getStartIndex();
+  const startIdx = (currentPeriod === 'all') ? 0 : labels.indexOf(`${currentPeriod}/01`);
   const slicedLabels = labels.slice(startIdx);
-  
   const datasets = activeKeys.map(key => {
     const rawData = db[key].slice(startIdx);
     const baseValue = rawData[0];
-    const percentageData = rawData.map(v => baseValue ? ((v - baseValue) / baseValue) * 100 : 0);
-    
-    const isSelected = selectedAssetKey === key;
-    const isDimmed = selectedAssetKey !== null && !isSelected;
-
     return {
       label: meta[key].label,
-      data: percentageData,
+      data: rawData.map(v => baseValue ? ((v - baseValue) / baseValue) * 100 : 0),
       rawValues: rawData,
-      borderColor: isDimmed ? '#e2e8f0' : meta[key].color,
+      borderColor: selectedAssetKey && selectedAssetKey !== key ? '#e2e8f0' : meta[key].color,
       backgroundColor: meta[key].color,
-      borderWidth: isSelected ? 4 : (isDimmed ? 1 : 2),
-      pointRadius: 0,
-      tension: 0.1,
-      assetKey: key,
-      order: isSelected ? -1 : (isDimmed ? 1 : 0)
+      borderWidth: selectedAssetKey === key ? 4 : 2,
+      pointRadius: 0, tension: 0.1, assetKey: key
     };
   });
-
   myChart.data.labels = slicedLabels;
   myChart.data.datasets = datasets;
   myChart.update(mode);
-
-  updateRankingAndSummary(activeKeys, startIdx);
-  document.getElementById('ranking-period-label').textContent = document.querySelector('.period-btn.active').textContent;
+  updateRanking(activeKeys, startIdx);
 }
 
-function updateRankingAndSummary(keys, startIdx) {
-  const rankingList = document.getElementById('ranking-list');
-  rankingList.innerHTML = '';
-
-  if (keys.length === 0) {
-    document.getElementById('summary-best-name').textContent = '-';
-    document.getElementById('summary-best-val').textContent = '-';
-    document.getElementById('summary-avg').textContent = '-';
-    document.getElementById('summary-worst-name').textContent = '-';
-    document.getElementById('summary-worst-val').textContent = '-';
-    return;
-  }
-
+function updateRanking(keys, startIdx) {
+  const list = document.getElementById('ranking-list');
+  list.innerHTML = '';
   const performance = keys.map(key => {
     const data = db[key];
-    const startVal = data[startIdx];
-    const endVal = data[data.length - 1];
-    const change = startVal ? ((endVal - startVal) / startVal) * 100 : 0;
-    return { key, change, endVal, label: meta[key].label, color: meta[key].color };
+    const change = ((data[data.length-1] - data[startIdx]) / data[startIdx]) * 100;
+    return { key, change, label: meta[key].label, color: meta[key].color, val: data[data.length-1] };
   }).sort((a, b) => b.change - a.change);
 
-  performance.forEach((item, index) => {
-    const el = document.createElement('div');
-    el.className = `ranking-item p-3 rounded-lg flex items-center justify-between mb-1 ${item.key === selectedAssetKey ? 'active-highlight' : ''}`;
-    el.style.borderLeftColor = item.key === selectedAssetKey ? item.color : 'transparent';
-    el.innerHTML = `
-      <div class="flex items-center space-x-3">
-        <span class="font-black text-slate-300 w-4 text-center">${index + 1}</span>
-        <span class="font-bold text-sm text-slate-700" style="color:${item.color}">${item.label}</span>
-      </div>
-      <div class="text-right">
-        <div class="font-black text-sm ${item.change > 0 ? 'text-emerald-500' : 'text-rose-500'}">
-          ${item.change > 0 ? '+' : ''}${item.change.toFixed(1)}%
-        </div>
-        <div class="text-[10px] text-slate-400">¥${item.endVal.toLocaleString()}</div>
-      </div>
-    `;
-    el.addEventListener('click', () => toggleAssetSelection(item.key));
-    rankingList.appendChild(el);
+  performance.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = "ranking-item p-2 rounded flex justify-between items-center text-xs";
+    div.innerHTML = `<div><span class="font-bold" style="color:${item.color}">${item.label}</span></div><div class="text-right font-black ${item.change>=0?'text-emerald-500':'text-rose-500'}">${item.change.toFixed(1)}%</div>`;
+    list.appendChild(div);
   });
-
-  const best = performance[0];
-  const worst = performance[performance.length - 1];
-  const avg = performance.reduce((sum, p) => sum + p.change, 0) / performance.length;
-
-  document.getElementById('summary-best-name').textContent = best.label;
-  document.getElementById('summary-best-name').style.color = best.color;
-  document.getElementById('summary-best-val').textContent = `+${best.change.toFixed(1)}%`;
   
-  document.getElementById('summary-worst-name').textContent = worst.label;
-  document.getElementById('summary-worst-name').style.color = worst.color;
-  document.getElementById('summary-worst-val').textContent = `${worst.change.toFixed(1)}%`;
-
-  document.getElementById('summary-avg').textContent = `${avg > 0 ? '+' : ''}${avg.toFixed(1)}%`;
+  if(performance.length > 0) {
+    document.getElementById('summary-best-name').textContent = performance[0].label;
+    document.getElementById('summary-best-val').textContent = performance[0].change.toFixed(1) + '%';
+    document.getElementById('summary-worst-name').textContent = performance[performance.length-1].label;
+    document.getElementById('summary-worst-val').textContent = performance[performance.length-1].change.toFixed(1) + '%';
+    const avg = performance.reduce((s, p) => s + p.change, 0) / performance.length;
+    document.getElementById('summary-avg').textContent = avg.toFixed(1) + '%';
+  }
 }
 
-function toggleAssetSelection(key) {
-  selectedAssetKey = (selectedAssetKey === key) ? null : key;
-  updateDashboard('none');
+function setupSimulationListeners() {
+  document.getElementById('simulate-btn').addEventListener('click', () => {
+    const amount = parseInt(document.getElementById('monthly-amount').value);
+    const date = document.getElementById('start-year').value + '/' + document.getElementById('start-month').value;
+    const results = activeKeys.map(key => {
+      const res = calculateMonthlyInvestment(key, amount, date);
+      return res ? {...res, label: meta[key].label, color: meta[key].color} : null;
+    }).filter(r => r).sort((a,b) => b.profitPercentage - a.profitPercentage);
+
+    const container = document.getElementById('simulation-results');
+    container.innerHTML = results.map(r => `
+      <div class="p-3 border rounded-lg bg-white border-l-4" style="border-left-color:${r.color}">
+        <div class="flex justify-between items-center">
+          <span class="font-bold text-sm">${r.label}</span>
+          <span class="text-xs font-black ${r.profit>=0?'text-emerald-600':'text-rose-600'}">${r.profitPercentage.toFixed(1)}%</span>
+        </div>
+        <div class="text-right font-black text-lg">¥${Math.floor(r.currentValue).toLocaleString()}</div>
+      </div>
+    `).join('');
+  });
 }
-
-// Plugins
-const negativeZonePlugin = {
-  id: 'negativeZone',
-  beforeDraw: (chart) => {
-    const { ctx, chartArea, scales } = chart;
-    const yAxis = scales.y;
-    const zeroPixel = yAxis.getPixelForValue(0);
-    const bottomPixel = chartArea.bottom;
-    const topPixel = chartArea.top;
-
-    if (zeroPixel < bottomPixel) {
-        const startY = Math.max(zeroPixel, topPixel);
-        ctx.save();
-        ctx.fillStyle = 'rgba(220, 38, 38, 0.05)'; 
-        ctx.fillRect(chartArea.left, startY, chartArea.width, bottomPixel - startY);
-        ctx.restore();
-    }
-  }
-};
-
-const customLabelPlugin = {
-  id: 'customSmartLabels',
-  afterDatasetsDraw: (chart) => {
-    const ctx = chart.ctx;
-    const datasets = chart.data.datasets;
-    const isMobile = window.innerWidth < 768;
-    const labelPoints = [];
-
-    datasets.forEach((ds, i) => {
-      const meta = chart.getDatasetMeta(i);
-      if (meta.hidden) return;
-      const lastIndex = ds.data.length - 1;
-      if (ds.data[lastIndex] == null) return;
-      const view = meta.data[lastIndex];
-      
-      if (view) {
-        let color = ds.borderColor;
-        let bgColor = 'white';
-        if (selectedAssetKey !== null && ds.assetKey !== selectedAssetKey) {
-           color = '#cbd5e1'; 
-           bgColor = '#f8fafc';
-        }
-        labelPoints.push({ index: i, x: view.x, y: view.y, drawY: view.y, label: ds.label, color, bgColor, assetKey: ds.assetKey });
-      }
-    });
-
-    labelPoints.sort((a, b) => a.y - b.y);
-    const spacing = 2; 
-    const labelHeight = isMobile ? 16 : 24; 
-
-    for (let i = 1; i < labelPoints.length; i++) {
-        const prev = labelPoints[i - 1];
-        const curr = labelPoints[i];
-        if (curr.drawY < prev.drawY + labelHeight + spacing) {
-            curr.drawY = prev.drawY + labelHeight + spacing;
-        }
-    }
-
-    ctx.save();
-    ctx.font = isMobile ? 'bold 9px "Inter", sans-serif' : 'bold 12px "Inter", sans-serif';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    const paddingX = isMobile ? 4 : 8;
-    const labelXOffset = isMobile ? 5 : 10;
-
-    labelPoints.forEach(p => {
-      ctx.beginPath();
-      ctx.strokeStyle = p.color;
-      ctx.lineWidth = 1;
-      ctx.moveTo(p.x, p.y); 
-      ctx.lineTo(chart.chartArea.right + 2, p.drawY);
-      ctx.lineTo(chart.chartArea.right + labelXOffset, p.drawY);
-      ctx.stroke();
-
-      ctx.fillStyle = p.color;
-      ctx.fillText(p.label, chart.chartArea.right + labelXOffset + paddingX, p.drawY);
-    });
-    ctx.restore();
-  }
-};
 
 function renderChart() {
   const ctx = document.getElementById('chart').getContext('2d');
-  Chart.defaults.font.family = "'Inter', sans-serif";
-  const isMobile = window.innerWidth < 768; 
-
   myChart = new Chart(ctx, {
     type: 'line',
     data: { labels: [], datasets: [] },
-    plugins: [negativeZonePlugin, customLabelPlugin],
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'nearest', axis: 'x', intersect: false },
-      onClick: (e, activeElements, chart) => {
-        if (activeElements.length > 0) {
-          const index = activeElements[0].datasetIndex;
-          const key = chart.data.datasets[index].assetKey;
-          toggleAssetSelection(key);
-        } else {
-          selectedAssetKey = null;
-          updateDashboard('none');
-        }
+      plugins: { legend: { display: false }, tooltip: { enabled: true } },
+      scales: { 
+        x: { grid: { display: false } },
+        y: { ticks: { callback: v => v + '%' } }
       },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          enabled: !isMobile,
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
-          titleColor: '#1e293b',
-          bodyColor: '#334155',
-          borderColor: '#e2e8f0',
-          borderWidth: 1,
-          padding: 10,
-          titleFont: { weight: 'bold' },
-          callbacks: {
-            label: function(context) {
-              const label = context.dataset.label || '';
-              const val = context.parsed.y;
-              const raw = context.dataset.rawValues[context.dataIndex];
-              return `${label}: ${val > 0 ? '+' : ''}${val.toFixed(1)}% (¥${raw.toLocaleString()})`;
-            }
-          }
-        },
-        datalabels: { display: false }
-      },
-      layout: { padding: { right: isMobile ? 80 : 120 } },
-      scales: {
-        x: { grid: { display: true, color: '#f1f5f9' }, ticks: { maxTicksLimit: isMobile ? 6 : 12, color: '#64748b' } },
-        y: { grid: { color: '#f1f5f9' }, ticks: { callback: function(value) { return value + '%'; }, color: '#94a3b8' } }
-      }
+      layout: { padding: { right: 50 } }
     }
   });
 }
