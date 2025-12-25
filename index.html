@@ -3,50 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Rational Greed v5.1 - The Command Center</title>
+<title>Rational Greed v5.1 - Strategic Asset Simulator</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: #f8fafc; color: #0f172a; }
+  body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: #f8fafc; color: #0f172a; -webkit-tap-highlight-color: transparent; }
   .card { background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); padding: 20px; border: 1px solid #e2e8f0; }
+  .ranking-scroll { max-height: 500px; overflow-y: auto; }
+  .ranking-scroll::-webkit-scrollbar { width: 4px; }
+  .ranking-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
   .asset-checkbox:checked + div { background-color: #f1f5f9; border-color: currentColor; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
-  .period-btn { transition: all 0.2s; }
-  .period-btn.active { background-color: #0f172a; color: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
-  /* スクロールバー非表示 */
-  .scrollbar-hide::-webkit-scrollbar { display: none; }
-  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-  
-  /* RSIシグナルのアニメーション */
-  @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
-  .signal-buy { animation: pulse-green 2s infinite; border-color: #10b981; color: #047857; background-color: #ecfdf5; }
-  .signal-sell { border-color: #f43f5e; color: #be123c; background-color: #fff1f2; }
-  
-  /* シミュレーション結果カード */
+  .period-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); touch-action: manipulation; }
+  .period-btn.active { background-color: #0f172a; color: white; border-color: #0f172a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
   .simulation-result-card { transition: all 0.3s ease; border-left: 4px solid transparent; }
   .simulation-result-card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05); }
 </style>
 </head>
 <body class="p-3 md:p-8 max-w-[1600px] mx-auto bg-slate-50 pb-20">
 
-  <!-- ★リアルタイム・マーケットバー (文字サイズUP + スクロール) -->
-  <div class="bg-slate-900 text-white py-3 px-4 flex justify-between items-center sticky top-0 z-50 shadow-md rounded-b-lg mb-6">
-    <div class="flex items-center gap-6 overflow-x-auto whitespace-nowrap scrollbar-hide w-full mr-4" id="ticker-area">
-      <span class="text-slate-400 font-mono text-xs shrink-0">MARKET DATA:</span>
-      <span class="text-slate-500 text-sm">Ready to fetch...</span>
-    </div>
-    <button onclick="fetchRealtimeData()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded font-bold transition flex items-center gap-1 shrink-0 text-xs">
-      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-      更新
-    </button>
-  </div>
-
-  <!-- 戦略ポートフォリオ -->
+  <!-- ★戦略ポートフォリオ表示エリア -->
   <div class="card mb-6 p-4 bg-indigo-50 border-l-4 border-indigo-600 text-slate-900 shadow-sm">
     <div class="flex justify-between items-start mb-4">
       <h3 class="text-sm font-bold flex items-center">
         <span class="mr-2 text-indigo-900">📊 2026 Target Portfolio</span>
-        <span class="text-[10px] bg-indigo-200 px-2 py-0.5 rounded text-indigo-800 font-extrabold">Rational Greed v5.0</span>
+        <span class="text-[10px] bg-indigo-200 px-2 py-0.5 rounded text-indigo-800 font-extrabold">Rational Greed v5.1</span>
       </h3>
       <div class="text-[10px] text-slate-500 bg-white px-2 py-1 rounded border border-slate-200 font-medium">戦略: 待機で機会を買い、需給で利益を取る</div>
     </div>
@@ -62,92 +43,105 @@
     </div>
   </div>
 
-  <!-- メインエリア -->
-  <div class="flex flex-col lg:grid lg:grid-cols-4 gap-6">
-    
-    <!-- チャート & シミュレーション -->
-    <div class="lg:col-span-3 order-1 space-y-6">
-      <!-- 期間選択 -->
-      <div class="overflow-x-auto flex gap-2 pb-1">
+  <header class="mb-6 md:mb-10 border-b border-slate-200 pb-6 flex justify-between items-end">
+    <div>
+      <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">資産パフォーマンス推移</h1>
+      <p class="text-slate-500 font-medium text-xs md:text-sm">2021.01 - 2025.11 (円建て・為替/分割反映済み)</p>
+    </div>
+    <div class="text-xl font-bold text-slate-700 font-mono hidden md:block">2025.12.25</div>
+  </header>
+
+  <!-- 期間選択ボタン (フルセット) -->
+  <div class="mb-6">
+    <div class="overflow-x-auto pb-2 -mx-3 px-3 md:mx-0 md:px-0 scroll-fade-right">
+      <div class="flex gap-2 min-w-max">
         <button class="period-btn active px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="all">全期間</button>
+        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2021">2021年〜</button>
         <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2022">2022年〜</button>
+        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2023">2023年〜</button>
         <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2024">2024年〜</button>
         <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2025">2025年〜</button>
       </div>
+    </div>
+  </div>
 
-      <div class="card h-[50vh] relative p-2 w-full"><canvas id="chart"></canvas></div>
+  <div class="flex flex-col lg:grid lg:grid-cols-4 gap-6">
+    <div class="lg:col-span-3 order-1 space-y-6">
+      <div class="card h-[55vh] md:h-[650px] relative p-1 md:p-6 w-full">
+        <canvas id="chart"></canvas>
+      </div>
       
-      <!-- ★ RSIコックピット (手動入力 & ターゲット) -->
-      <div class="card">
-        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center">
-          <span class="bg-slate-200 text-slate-700 px-2 py-1 rounded mr-2">RADAR</span> 戦況監視コックピット
-        </h3>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm text-left text-slate-600">
-            <thead class="text-xs text-slate-400 uppercase bg-slate-50">
-              <tr>
-                <th class="p-3 w-24">銘柄</th>
-                <th class="p-3 w-24">目標価格</th>
-                <th class="p-3 w-24">距離</th>
-                <th class="p-3 w-32">RSI (日足)</th>
-                <th class="p-3">判定</th>
-              </tr>
-            </thead>
-            <tbody id="rsi-table-body" class="divide-y divide-slate-100">
-              <!-- JSで生成 -->
-            </tbody>
-          </table>
+      <div class="grid grid-cols-3 gap-2 md:gap-4 text-center">
+        <div class="card bg-gradient-to-br from-indigo-50 to-white py-4 px-2">
+          <div class="text-[10px] text-indigo-400 font-bold uppercase mb-1">Top</div>
+          <div id="summary-best-name" class="text-xs md:text-sm font-black text-indigo-900 truncate">-</div>
+          <div id="summary-best-val" class="text-xs font-bold text-indigo-600">-</div>
         </div>
-        <p class="text-[10px] text-slate-400 mt-2 text-right">※RSI < 35: 買い場 (Grok) / RSI > 70: 過熱 (DeepSeek)</p>
+        <div class="card bg-white py-4 px-2 flex flex-col justify-center">
+          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Avg Change</div>
+          <div id="summary-avg" class="text-sm md:text-lg font-black text-slate-700">-</div>
+        </div>
+        <div class="card bg-white py-4 px-2 text-right">
+          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Bottom</div>
+          <div id="summary-worst-name" class="text-xs md:text-sm font-black text-slate-700 truncate">-</div>
+          <div id="summary-worst-val" class="text-xs font-bold text-slate-500">-</div>
+        </div>
       </div>
 
       <!-- 積立シミュレーション -->
       <div class="card">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4"><span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded mr-2">SIM</span> 積立シミュレーション (詳細版)</h3>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-          <input type="number" id="monthly-amount" value="20000" class="w-full px-4 py-2 border rounded text-sm">
-          <select id="start-year" class="w-full px-4 py-2 border rounded text-sm"><option value="2021" selected>2021年</option><option value="2022">2022年</option><option value="2023">2023年</option><option value="2024">2024年</option><option value="2025">2025年</option></select>
-          <select id="start-month" class="w-full px-4 py-2 border rounded text-sm"><option value="01">1月</option><option value="04">4月</option><option value="07">7月</option><option value="10">10月</option></select>
-          <button id="simulate-btn" class="bg-indigo-600 text-white font-bold py-2 rounded text-sm hover:bg-indigo-700 transition">実行</button>
-        </div>
-        <div id="simulation-results" class="space-y-4">
-             <div class="text-center py-6 text-slate-400 text-sm">設定を入力して「実行」を押してください</div>
-        </div>
-      </div>
-
-      <!-- ★ 参謀ノート (Local Storage) -->
-      <div class="card bg-slate-50 border-slate-200">
-        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex justify-between">
-          <span>📝 参謀ノート (三賢者の助言)</span>
-          <span id="save-status" class="text-[10px] text-emerald-500 hidden">Saved!</span>
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6 flex items-center">
+            <span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded mr-2">SIM</span> 積立投資シミュレーション (詳細版)
         </h3>
-        <textarea id="memo-pad" class="w-full h-32 p-3 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 bg-white" placeholder="ここにGrokの嗅覚やDeepSeekの警告を記録せよ..."></textarea>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 mb-1">月々の積立額 (円)</label>
+            <input type="number" id="monthly-amount" value="20000" class="w-full px-4 py-2 border rounded-lg font-medium text-sm">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 mb-1">開始年</label>
+            <select id="start-year" class="w-full px-4 py-2 border rounded-lg font-medium text-sm">
+                <option value="2021" selected>2021年</option>
+                <option value="2022">2022年</option>
+                <option value="2023">2023年</option>
+                <option value="2024">2024年</option>
+                <option value="2025">2025年</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 mb-1">開始月</label>
+            <select id="start-month" class="w-full px-4 py-2 border rounded-lg font-medium text-sm">
+                <option value="01" selected>1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option><option value="05">5月</option><option value="06">6月</option><option value="07">7月</option><option value="08">8月</option><option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+            </select>
+          </div>
+          <div class="flex items-end">
+            <button id="simulate-btn" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg text-sm hover:bg-indigo-700 transition active:scale-95 shadow-md">実行</button>
+          </div>
+        </div>
+
+        <div id="simulation-results" class="space-y-4">
+            <div class="text-center py-10 text-slate-400 bg-slate-50 rounded-lg border border-slate-100 border-dashed">
+                <p class="font-medium text-sm">設定を入力して「実行」をクリックしてください</p>
+            </div>
+        </div>
       </div>
     </div>
 
-    <!-- サイドバー -->
     <div class="lg:col-span-1 space-y-6 order-2">
       <div class="card p-4">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">表示銘柄</h3>
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">表示銘柄 (全12種)</h3>
         <div class="grid grid-cols-1 gap-1" id="asset-toggles"></div>
       </div>
       <div class="card h-[400px] flex flex-col">
         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">騰落率ランキング</h3>
-        <div class="flex-1 overflow-y-auto pr-1 space-y-1" id="ranking-list"></div>
+        <div class="flex-1 ranking-scroll pr-1 space-y-1" id="ranking-list"></div>
       </div>
     </div>
   </div>
 
 <script>
-// --- CONFIGURATION ---
-// 監視対象と目標価格 (Target Price)
-const targets = {
-  NVDA: 130, SMH: 220, AVGO: 160, PLTR: 60, CRWD: 300,
-  BTC: 85000, SILVER: 28, GOLD: 250
-};
-
 // =========================================================
-//  DATA DEFINITION (Real 円建て Data)
+//  DATA DEFINITION
 // =========================================================
 const db = {
   ASML: [55915,60412,68098,70580,74238,76361,84088,91588,83404,92534,90076,91606,78055,76972,81501,73110,73641,64999,76531,67971,60002,69829,84373,71638,86226,84207,90671,86716,100989,104931,101416,105156,87928,89288,100539,106740,128184,143376,146870,136371,150730,164536,156139,132100,119022,127814,158615,108753,113925,106371,99140,95067,106124,115814,109945,107270,144464,163015,165519],
@@ -193,120 +187,8 @@ let myChart = null;
 let currentPeriod = 'all';
 let activeKeys = Object.keys(db).filter(k => k !== 'SP500'); 
 let selectedAssetKey = null;
-// 現在価格のキャッシュ
-let currentPrices = {}; 
 
-// --- FUNCTIONS ---
-async function fetchRealtimeData() {
-  const tickerArea = document.getElementById('ticker-area');
-  tickerArea.innerHTML = '<span class="text-indigo-400 animate-pulse text-sm">Fetching data...</span>';
-  
-  // ★重要：ここにFinnhub APIキーを入れてください
-  const API_KEY = 'd56ohg9r01qkgd82vfigd56ohg9r01qkgd82vfj0'; 
-
-  const stocks = ['NVDA', 'SMH', 'AVGO', 'PLTR', 'CRWD', 'ITA', 'GLD', 'SLV'];
-  let html = '';
-  
-  try {
-    // 米国株
-    for (const symbol of stocks) {
-      const response = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`);
-      const data = await response.json();
-      if(data.c) {
-        currentPrices[symbol] = data.c; // 価格を保存
-        const color = data.dp >= 0 ? 'text-emerald-400' : 'text-rose-400';
-        const sign = data.dp >= 0 ? '+' : '';
-        html += `<div class="flex items-center gap-1 mr-4 shrink-0"><span class="font-bold text-slate-300 text-sm">${symbol}</span><span class="font-mono text-white text-sm">$${data.c}</span><span class="font-mono text-[10px] ${color}">(${sign}${data.dp.toFixed(2)}%)</span></div>`;
-      }
-    }
-    // BTC
-    const btcRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,jpy&include_24hr_change=true');
-    const btcData = await btcRes.json();
-    if(btcData.bitcoin) {
-      currentPrices['BTC'] = btcData.bitcoin.usd; // 価格を保存
-      const color = btcData.bitcoin.usd_24h_change >= 0 ? 'text-emerald-400' : 'text-rose-400';
-      const sign = btcData.bitcoin.usd_24h_change >= 0 ? '+' : '';
-      html += `<div class="flex items-center gap-1 mr-4 border-l border-slate-700 pl-4 shrink-0"><span class="font-bold text-orange-400 text-sm">BTC</span><span class="font-mono text-white text-sm">$${btcData.bitcoin.usd.toLocaleString()}</span><span class="font-mono text-[10px] ${color}">(${sign}${btcData.bitcoin.usd_24h_change.toFixed(2)}%)</span></div>`;
-    }
-    tickerArea.innerHTML = html;
-    updateRsiTable();
-
-  } catch (e) {
-    console.error(e);
-    tickerArea.innerHTML = '<span class="text-rose-500 text-sm">API Error (Check Key)</span>';
-  }
-}
-
-function updateRsiTable() {
-  const tbody = document.getElementById('rsi-table-body');
-  tbody.innerHTML = '';
-  
-  Object.keys(targets).forEach(key => {
-    let distanceStr = '-';
-    let currentP = currentPrices[key];
-    
-    if(currentP) {
-      const dist = ((currentP - targets[key]) / targets[key]) * 100;
-      const color = dist > 0 ? 'text-rose-500' : 'text-emerald-500';
-      distanceStr = `<span class="${color} font-bold">${dist > 0 ? '+' : ''}${dist.toFixed(1)}%</span>`;
-    }
-
-    const row = document.createElement('tr');
-    row.className = "border-b border-slate-50 hover:bg-slate-50/50 transition";
-    row.innerHTML = `
-      <td class="p-3 font-bold text-slate-700">${key}</td>
-      <td class="p-3 font-mono text-xs text-slate-500">$${targets[key]}</td>
-      <td class="p-3 font-mono text-xs">${distanceStr}</td>
-      <td class="p-3">
-        <input type="number" class="w-16 p-1 border rounded text-center text-sm" placeholder="-" oninput="checkRsi(this)">
-      </td>
-      <td class="p-3 text-xs font-bold text-slate-400 status-cell">-</td>
-    `;
-    tbody.appendChild(row);
-  });
-}
-
-function checkRsi(input) {
-  const val = Number(input.value);
-  const cell = input.parentElement.nextElementSibling;
-  
-  if (val && val < 35) {
-    cell.innerHTML = '<span class="px-2 py-1 rounded bg-emerald-100 text-emerald-600 signal-buy">🟢 BUY</span>';
-  } else if (val && val > 70) {
-    cell.innerHTML = '<span class="px-2 py-1 rounded bg-rose-100 text-rose-600 signal-sell">🔴 WAIT</span>';
-  } else {
-    cell.textContent = 'NEUTRAL';
-  }
-}
-
-// ----------------------------------------
-//  Memo Logic
-// ----------------------------------------
-const memoPad = document.getElementById('memo-pad');
-const saveStatus = document.getElementById('save-status');
-
-memoPad.value = localStorage.getItem('rational_greed_memo') || '';
-
-memoPad.addEventListener('input', () => {
-  localStorage.setItem('rational_greed_memo', memoPad.value);
-  saveStatus.classList.remove('hidden');
-  setTimeout(() => saveStatus.classList.add('hidden'), 2000);
-});
-
-// ----------------------------------------
-//  Chart Logic
-// ----------------------------------------
-function initPortfolioChart() {
-    new Chart(document.getElementById('portfolioChart'), {
-      type: 'doughnut',
-      data: {
-        labels: ['Cash', 'AI Core', 'Defense', 'BTC', 'Silver'],
-        datasets: [{ data: [35, 20, 20, 15, 10], backgroundColor: ['#10b981', '#4f46e5', '#06b6d4', '#f97316', '#64748b'], borderWidth: 0 }]
-      },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '75%' }
-    });
-}
-
+// --- PLUGINS ---
 const customLabelPlugin = {
   id: 'customSmartLabels',
   afterDatasetsDraw: (chart) => {
@@ -347,15 +229,23 @@ const negativeZonePlugin = {
   }
 };
 
+function initPortfolioChart() {
+    new Chart(document.getElementById('portfolioChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Cash', 'AI Core', 'Defense', 'BTC', 'Silver'],
+        datasets: [{ data: [35, 20, 20, 15, 10], backgroundColor: ['#10b981', '#4f46e5', '#06b6d4', '#f97316', '#64748b'], borderWidth: 0 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '75%' }
+    });
+}
+
 function init() {
   initPortfolioChart();
   createAssetToggles();
   renderChart();
   setupSimulationListeners();
   updateDashboard();
-  
-  // ★修正：0.5秒待ってから自動実行（これで確実に動きます）
-  setTimeout(fetchRealtimeData, 500);
 }
 
 function createAssetToggles() {
@@ -425,21 +315,18 @@ function updateRanking(keys, startIdx) {
 function setupSimulationListeners() {
   document.getElementById('simulate-btn').addEventListener('click', () => {
     const amount = parseInt(document.getElementById('monthly-amount').value);
-    const startY = document.getElementById('start-year').value;
-    const startM = document.getElementById('start-month').value;
-    const startDate = `${startY}/${startM}`;
-    const startIdx = labels.indexOf(startDate);
-
-    if (startIdx === -1) { alert('開始日がデータ範囲外です'); return; }
-
+    const date = document.getElementById('start-year').value + '/' + document.getElementById('start-month').value;
+    const startIdx = labels.indexOf(date);
     const results = activeKeys.map(key => {
       const data = db[key];
+      if (startIdx === -1 || startIdx >= data.length) return null;
       let totalUnits = 0, totalInv = 0;
       for (let i = startIdx; i < data.length; i++) { totalUnits += amount / data[i]; totalInv += amount; }
       const curVal = totalUnits * data[data.length-1];
-      return { label: meta[key].label, color: meta[key].color, totalInvestment: totalInv, currentValue: curVal, profitPerc: ((curVal - totalInv) / totalInv) * 100, totalUnits: totalUnits };
+      return { label: meta[key].label, color: meta[key].color, currentValue: curVal, profitPerc: ((curVal - totalInv) / totalInv) * 100, totalUnits: totalUnits };
     }).filter(r => r).sort((a,b) => b.profitPerc - a.profitPerc);
     
+    // 詳細版カードデザイン (復活版)
     document.getElementById('simulation-results').innerHTML = results.map((r, index) => `
       <div class="simulation-result-card p-5 border border-slate-200 rounded-xl bg-white mb-4 ${r.profitPerc >= 0 ? 'border-l-emerald-500' : 'border-l-rose-500'}" style="border-left-color:${r.color}">
         <div class="flex items-start justify-between mb-4">
