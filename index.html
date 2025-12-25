@@ -27,7 +27,7 @@
         <span class="mr-2 text-indigo-900">📊 2026 Target Portfolio</span>
         <span class="text-[10px] bg-indigo-200 px-2 py-0.5 rounded text-indigo-800 font-extrabold">Rational Greed v5.0</span>
       </h3>
-      <div class="text-[10px] text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">戦略: 待機で機会を買い、需給で利益を取る</div>
+      <div class="text-[10px] text-slate-500 bg-white px-2 py-1 rounded border border-slate-200 font-medium">戦略: 待機で機会を買い、需給で利益を取る</div>
     </div>
     <div class="flex flex-col md:flex-row items-center gap-8">
       <div class="w-40 h-40 relative shrink-0"><canvas id="portfolioChart"></canvas></div>
@@ -41,12 +41,17 @@
     </div>
   </div>
 
-  <header class="mb-6 md:mb-10 text-center md:text-left md:flex md:justify-between md:items-end border-b border-slate-200 pb-4 md:pb-6">
-    <div>
-      <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">資産パフォーマンス推移</h1>
-      <p class="text-slate-500 font-medium text-xs md:text-sm">2021.01 - 2025.11 (円建て換算済み)</p>
+  <header class="mb-6 md:mb-10 border-b border-slate-200 pb-6">
+    <div class="flex justify-between items-end">
+      <div>
+        <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">資産パフォーマンス推移</h1>
+        <p class="text-slate-500 font-medium text-xs md:text-sm">2021.01 - 2025.11 (円建て・株式分割調整済み)</p>
+      </div>
+      <div class="text-xl font-bold text-slate-700 font-mono hidden md:block text-right">
+        <div class="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Last Update</div>
+        2025.12.25
+      </div>
     </div>
-    <div class="mt-2 md:mt-0 text-xl font-bold text-slate-700 font-mono hidden md:block">2025.12.25</div>
   </header>
 
   <div class="mb-6 overflow-x-auto">
@@ -69,8 +74,8 @@
           <div id="summary-best-name" class="text-xs md:text-sm font-black text-indigo-900 truncate">-</div>
           <div id="summary-best-val" class="text-xs font-bold text-indigo-600">-</div>
         </div>
-        <div class="card bg-white py-4 px-2">
-          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Average Change</div>
+        <div class="card bg-white py-4 px-2 flex flex-col justify-center">
+          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Avg Change</div>
           <div id="summary-avg" class="text-sm md:text-lg font-black text-slate-700">-</div>
         </div>
         <div class="card bg-white py-4 px-2 text-right">
@@ -79,25 +84,11 @@
           <div id="summary-worst-val" class="text-xs font-bold text-slate-500">-</div>
         </div>
       </div>
-      <div class="card">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6 flex items-center"><span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded mr-2">SIM</span> 積立シミュレーション</h3>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <input type="number" id="monthly-amount" value="20000" class="w-full px-4 py-2 border rounded-lg font-medium text-sm">
-          <select id="start-year" class="w-full px-4 py-2 border rounded-lg font-medium text-sm">
-            <option value="2021">2021年</option><option value="2022">2022年</option><option value="2023">2023年</option><option value="2024">2024年</option><option value="2025" selected>2025年</option>
-          </select>
-          <select id="start-month" class="w-full px-4 py-2 border rounded-lg font-medium text-sm">
-            <option value="01" selected>1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option><option value="05">5月</option><option value="06">6月</option><option value="07">7月</option><option value="08">8月</option><option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
-          </select>
-          <button id="simulate-btn" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg text-sm">実行</button>
-        </div>
-        <div id="simulation-results" class="space-y-4"></div>
-      </div>
     </div>
 
     <div class="lg:col-span-1 space-y-6 order-2">
       <div class="card p-4">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">表示銘柄</h3>
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">表示銘柄 (注視リスト)</h3>
         <div class="grid grid-cols-1 gap-1" id="asset-toggles"></div>
       </div>
       <div class="card h-[400px] flex flex-col">
@@ -108,7 +99,11 @@
   </div>
 
 <script>
+// =========================================================
+//  データ定義 (2021/01 - 2025/11) : 円建て換算済み
+// =========================================================
 const db = {
+  NVDA: [1361,1460,1478,1649,1770,2211,2155,2452,2317,2824,3722,3383,2824,2832,3532,2414,2402,1929,2420,2026,1681,1860,2317,1683,2518,3244,3704,3852,5859,6588,6939,6078,5945,6443,7335,7281,9535,12440,13665,13636,16194,17143,15350,18364,18073,18683,18810,21124,18620,18943,16641,16204,21096,25227,30293,28646,31230,34800,31230],
   SMH: [11861,12834,13431,13232,13694,14382,14387,14887,14342,15574,17349,17766,15871,15509,16461,14904,13063,13919,15792,14131,13369,13984,15531,13304,15468,16317,17529,15533,18476,20353,22615,22822,21656,20719,23597,24660,27392,31931,34050,33465,37744,41941,37731,35564,35056,37026,36258,38020,37541,34918,31639,30420,38379,40303,43093,42137,48496,55869,55009],
   AVGO: [4716,5006,5115,4968,5191,5321,5323,5466,5428,5723,6301,7656,6753,6790,7684,7189,7413,6636,7134,6924,6413,6949,7645,7330,7633,8101,8545,8541,11295,12558,12648,13484,12406,12546,13611,15742,17389,19593,20058,20325,20851,25829,24533,23798,24630,26010,24271,36398,34097,29917,25050,27388,34969,39841,42468,43722,49023,56886,62922],
   PLTR: [3683,2546,2569,2509,2522,2914,2381,2896,2691,2946,2350,2095,1580,1370,1675,1349,1109,1239,1379,1071,1174,1299,1041,842,1015,1152,1125,1056,2056,2220,2793,2190,2390,2207,2948,2421,2371,3467,3482,3434,3405,4075,3867,4601,5312,6367,10041,11863,12711,12739,12239,11854,18982,19684,23629,23039,27106,30852,26303],
@@ -121,6 +116,7 @@ const db = {
 };
 
 const meta = {
+  NVDA:   { label:'NVIDIA (注視)', color:'#84cc16', type:'stock' }, // NVDA Green
   SMH:    { label:'AI Semi (SMH)', color:'#4f46e5', type:'stock' },
   AVGO:   { label:'AI Infra (AVGO)', color:'#1e3a8a', type:'stock' },
   PLTR:   { label:'AI Data (PLTR)', color:'#a855f7', type:'stock' },
@@ -142,23 +138,9 @@ for (let i = 0; i < 59; i++) {
 
 let myChart = null;
 let currentPeriod = 'all';
-// 初期設定: SP500 以外を全てアクティブにする
-let activeKeys = ['SMH', 'AVGO', 'PLTR', 'CRWD', 'BTC', 'ITA', 'SILVER', 'GOLD']; 
+// SP500 以外を全てアクティブにする
+let activeKeys = ['NVDA', 'SMH', 'AVGO', 'PLTR', 'CRWD', 'BTC', 'ITA', 'SILVER', 'GOLD']; 
 let selectedAssetKey = null;
-
-const negativeZonePlugin = {
-  id: 'negativeZone',
-  beforeDraw: (chart) => {
-    const { ctx, chartArea, scales } = chart;
-    const zeroPixel = scales.y.getPixelForValue(0);
-    if (zeroPixel < chartArea.bottom) {
-        ctx.save();
-        ctx.fillStyle = 'rgba(220, 38, 38, 0.05)'; 
-        ctx.fillRect(chartArea.left, zeroPixel, chartArea.width, chartArea.bottom - zeroPixel);
-        ctx.restore();
-    }
-  }
-};
 
 const customLabelPlugin = {
   id: 'customSmartLabels',
@@ -171,16 +153,16 @@ const customLabelPlugin = {
       if (meta.hidden) return;
       const lastPoint = meta.data[meta.data.length - 1];
       if (lastPoint && !isNaN(lastPoint.y)) {
-        labelPoints.push({ index: i, y: lastPoint.y, label: ds.label, color: ds.borderColor });
+        labelPoints.push({ y: lastPoint.y, label: ds.label, color: ds.borderColor });
       }
     });
     labelPoints.sort((a, b) => a.y - b.y);
-    const labelHeight = isMobile ? 14 : 18;
+    const labelHeight = isMobile ? 12 : 16;
     for (let i = 1; i < labelPoints.length; i++) {
       if (labelPoints[i].y < labelPoints[i-1].y + labelHeight) { labelPoints[i].y = labelPoints[i-1].y + labelHeight; }
     }
     ctx.save();
-    ctx.font = `bold ${isMobile ? '9px' : '11px'} sans-serif`;
+    ctx.font = `bold ${isMobile ? '8px' : '10px'} sans-serif`;
     labelPoints.forEach(p => { ctx.fillStyle = p.color; ctx.fillText(p.label, chartArea.right + 5, p.y); });
     ctx.restore();
   }
@@ -190,7 +172,7 @@ function initPortfolioChart() {
     new Chart(document.getElementById('portfolioChart'), {
       type: 'doughnut',
       data: {
-        labels: ['Cash', 'AI (H+S)', 'Defense', 'BTC', 'Silver'],
+        labels: ['Cash', 'AI Core', 'Defense', 'BTC', 'Silver'],
         datasets: [{ data: [35, 20, 20, 15, 10], backgroundColor: ['#10b981', '#4f46e5', '#06b6d4', '#f97316', '#64748b'], borderWidth: 0 }]
       },
       options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '75%' }
@@ -201,7 +183,6 @@ function init() {
   initPortfolioChart();
   createAssetToggles();
   renderChart();
-  setupSimulationListeners();
   updateDashboard();
 }
 
@@ -209,9 +190,8 @@ function createAssetToggles() {
   const container = document.getElementById('asset-toggles');
   Object.keys(meta).forEach(key => {
     const m = meta[key];
-    const isChecked = activeKeys.includes(key) ? 'checked' : '';
     const div = document.createElement('div');
-    div.innerHTML = `<label class="cursor-pointer block mb-1"><input type="checkbox" class="asset-checkbox hidden" value="${key}" ${isChecked}><div class="flex items-center p-2 rounded-lg border border-transparent transition-all hover:bg-white" style="color:${m.color}"><span class="w-2 h-2 rounded-full mr-2" style="background-color:${m.color}"></span><span class="font-bold text-[10px] text-slate-700">${m.label}</span></div></label>`;
+    div.innerHTML = `<label class="cursor-pointer block"><input type="checkbox" class="asset-checkbox hidden" value="${key}" ${activeKeys.includes(key)?'checked':''}><div class="flex items-center p-1.5 rounded-lg border border-transparent transition-all hover:bg-white" style="color:${m.color}"><span class="w-2.5 h-2.5 rounded-full mr-2" style="background-color:${m.color}"></span><span class="font-bold text-[9px] text-slate-700">${m.label}</span></div></label>`;
     container.appendChild(div);
   });
   container.addEventListener('change', () => {
@@ -254,52 +234,32 @@ function updateRanking(keys, startIdx) {
   }).sort((a, b) => b.change - a.change);
 
   document.getElementById('ranking-list').innerHTML = performance.map(item => `
-    <div class="ranking-item p-2 rounded flex justify-between items-center text-[10px]">
+    <div class="ranking-item p-1.5 rounded flex justify-between items-center text-[9px]">
       <span class="font-bold" style="color:${item.color}">${item.label}</span>
       <span class="font-black ${item.change>=0?'text-emerald-500':'text-rose-500'}">${item.change.toFixed(1)}%</span>
     </div>`).join('');
-  
+
   if(performance.length > 0) {
     document.getElementById('summary-best-name').textContent = performance[0].label;
     document.getElementById('summary-best-val').textContent = performance[0].change.toFixed(1) + '%';
     document.getElementById('summary-worst-name').textContent = performance[performance.length-1].label;
     document.getElementById('summary-worst-val').textContent = performance[performance.length-1].change.toFixed(1) + '%';
-    document.getElementById('summary-avg').textContent = (performance.reduce((s, p) => s + p.change, 0) / performance.length).toFixed(1) + '%';
+    const avg = performance.reduce((s, p) => s + p.change, 0) / performance.length;
+    document.getElementById('summary-avg').textContent = avg.toFixed(1) + '%';
   }
-}
-
-function setupSimulationListeners() {
-  document.getElementById('simulate-btn').addEventListener('click', () => {
-    const amount = parseInt(document.getElementById('monthly-amount').value);
-    const date = document.getElementById('start-year').value + '/' + document.getElementById('start-month').value;
-    const startIdx = labels.indexOf(date);
-    const results = activeKeys.map(key => {
-      const data = db[key];
-      if (startIdx === -1 || startIdx >= data.length) return null;
-      let totalUnits = 0, totalInv = 0;
-      for (let i = startIdx; i < data.length; i++) { totalUnits += amount / data[i]; totalInv += amount; }
-      const curVal = totalUnits * data[data.length-1];
-      return { label: meta[key].label, color: meta[key].color, currentValue: curVal, profitPerc: ((curVal - totalInv) / totalInv) * 100 };
-    }).filter(r => r).sort((a,b) => b.profitPerc - a.profitPerc);
-    document.getElementById('simulation-results').innerHTML = results.map(r => `
-      <div class="p-2 border rounded bg-white border-l-4 mb-2" style="border-left-color:${r.color}">
-        <div class="flex justify-between text-[10px] font-bold"><span>${r.label}</span><span class="${r.profitPerc>=0?'text-emerald-600':'text-rose-600'}">${r.profitPerc.toFixed(1)}%</span></div>
-        <div class="text-right font-black text-xs">¥${Math.floor(r.currentValue).toLocaleString()}</div>
-      </div>`).join('');
-  });
 }
 
 function renderChart() {
   myChart = new Chart(document.getElementById('chart'), {
     type: 'line',
     data: { labels: [], datasets: [] },
-    plugins: [negativeZonePlugin, customLabelPlugin],
+    plugins: [customLabelPlugin],
     options: {
       responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'nearest', axis: 'x', intersect: false },
       plugins: { legend: { display: false } },
       scales: { x: { grid: { display: false } }, y: { ticks: { callback: v => v + '%' } } },
-      layout: { padding: { right: 120 } }
+      layout: { padding: { right: 100 } }
     }
   });
 }
