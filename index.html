@@ -93,21 +93,26 @@
         <canvas id="chart"></canvas>
       </div>
       
-      <!-- Summary Cards -->
+     <!-- Summary Cards (Colorful & Centered) -->
       <div class="grid grid-cols-3 gap-2 md:gap-4 text-center">
-        <div class="card bg-gradient-to-br from-indigo-50 to-white py-4 px-2">
-          <div class="text-[10px] text-indigo-400 font-bold uppercase mb-1">Top</div>
-          <div id="summary-best-name" class="text-xs md:text-sm font-black text-indigo-900 truncate">-</div>
-          <div id="summary-best-val" class="text-xs font-bold text-indigo-600">-</div>
+        <!-- TOP: 青系で強調 -->
+        <div class="card bg-indigo-50 border-2 border-indigo-100 py-4 px-2 flex flex-col justify-center shadow-sm">
+          <div class="text-[10px] text-indigo-500 font-bold uppercase mb-1 tracking-widest">👑 Top Asset</div>
+          <div id="summary-best-name" class="text-sm md:text-lg font-black text-indigo-900 truncate">-</div>
+          <div id="summary-best-val" class="text-xs md:text-sm font-bold text-indigo-600 bg-white rounded-full px-2 py-0.5 mx-auto mt-1 w-max shadow-sm">-</div>
         </div>
-        <div class="card bg-white py-4 px-2 flex flex-col justify-center">
-          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Avg Change</div>
+        
+        <!-- AVG: グレーで落ち着かせる -->
+        <div class="card bg-slate-50 border border-slate-200 py-4 px-2 flex flex-col justify-center">
+          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1 tracking-widest">Average</div>
           <div id="summary-avg" class="text-sm md:text-lg font-black text-slate-700">-</div>
         </div>
-        <div class="card bg-white py-4 px-2 text-right">
-          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Bottom</div>
-          <div id="summary-worst-name" class="text-xs md:text-sm font-black text-slate-700 truncate">-</div>
-          <div id="summary-worst-val" class="text-xs font-bold text-slate-500">-</div>
+        
+        <!-- BOTTOM: 赤系で警戒 -->
+        <div class="card bg-rose-50 border-2 border-rose-100 py-4 px-2 flex flex-col justify-center shadow-sm">
+          <div class="text-[10px] text-rose-500 font-bold uppercase mb-1 tracking-widest">⚠️ Bottom</div>
+          <div id="summary-worst-name" class="text-sm md:text-lg font-black text-rose-900 truncate">-</div>
+          <div id="summary-worst-val" class="text-xs md:text-sm font-bold text-rose-600 bg-white rounded-full px-2 py-0.5 mx-auto mt-1 w-max shadow-sm">-</div>
         </div>
       </div>
 
