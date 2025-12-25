@@ -354,8 +354,8 @@ function init() {
   setupSimulationListeners();
   updateDashboard();
   
-  // ★自動実行 (開発中はコメントアウト推奨)
-  fetchRealtimeData();
+  // ★修正：0.5秒待ってから自動実行（これで確実に動きます）
+  setTimeout(fetchRealtimeData, 500);
 }
 
 function createAssetToggles() {
