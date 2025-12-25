@@ -13,23 +13,29 @@
   .asset-checkbox:checked + div { background-color: #f1f5f9; border-color: currentColor; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
   .period-btn { transition: all 0.2s; }
   .period-btn.active { background-color: #0f172a; color: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
+  /* スクロールバー非表示 */
   .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
   
   /* RSIシグナルのアニメーション */
   @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
   .signal-buy { animation: pulse-green 2s infinite; border-color: #10b981; color: #047857; background-color: #ecfdf5; }
   .signal-sell { border-color: #f43f5e; color: #be123c; background-color: #fff1f2; }
+  
+  /* シミュレーション結果カード */
+  .simulation-result-card { transition: all 0.3s ease; border-left: 4px solid transparent; }
+  .simulation-result-card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05); }
 </style>
 </head>
 <body class="p-3 md:p-8 max-w-[1600px] mx-auto bg-slate-50 pb-20">
 
-  <!-- ★リアルタイム・マーケットバー -->
-  <div class="bg-slate-900 text-white text-xs py-2 px-4 flex justify-between items-center sticky top-0 z-50 shadow-md rounded-b-lg mb-6">
-    <div class="flex items-center gap-4 overflow-x-auto whitespace-nowrap scrollbar-hide" id="ticker-area">
-      <span class="text-slate-400 font-mono">MARKET DATA:</span>
-      <span class="text-slate-500">Ready to fetch...</span>
+  <!-- ★リアルタイム・マーケットバー (文字サイズUP + スクロール) -->
+  <div class="bg-slate-900 text-white py-3 px-4 flex justify-between items-center sticky top-0 z-50 shadow-md rounded-b-lg mb-6">
+    <div class="flex items-center gap-6 overflow-x-auto whitespace-nowrap scrollbar-hide w-full mr-4" id="ticker-area">
+      <span class="text-slate-400 font-mono text-xs shrink-0">MARKET DATA:</span>
+      <span class="text-slate-500 text-sm">Ready to fetch...</span>
     </div>
-    <button onclick="fetchRealtimeData()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded font-bold transition flex items-center gap-1 shrink-0 ml-4">
+    <button onclick="fetchRealtimeData()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded font-bold transition flex items-center gap-1 shrink-0 text-xs">
       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
       更新
     </button>
@@ -80,10 +86,10 @@
           <table class="w-full text-sm text-left text-slate-600">
             <thead class="text-xs text-slate-400 uppercase bg-slate-50">
               <tr>
-                <th class="p-3">銘柄</th>
-                <th class="p-3">目標価格(Target)</th>
-                <th class="p-3">距離</th>
-                <th class="p-3">現在RSI (日足)</th>
+                <th class="p-3 w-24">銘柄</th>
+                <th class="p-3 w-24">目標価格</th>
+                <th class="p-3 w-24">距離</th>
+                <th class="p-3 w-32">RSI (日足)</th>
                 <th class="p-3">判定</th>
               </tr>
             </thead>
@@ -97,14 +103,16 @@
 
       <!-- 積立シミュレーション -->
       <div class="card">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4"><span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded mr-2">SIM</span> 積立シミュレーション</h3>
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4"><span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded mr-2">SIM</span> 積立シミュレーション (詳細版)</h3>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <input type="number" id="monthly-amount" value="20000" class="w-full px-4 py-2 border rounded text-sm">
-          <select id="start-year" class="w-full px-4 py-2 border rounded text-sm"><option value="2021">2021年</option><option value="2022">2022年</option><option value="2023">2023年</option><option value="2024">2024年</option><option value="2025" selected>2025年</option></select>
+          <select id="start-year" class="w-full px-4 py-2 border rounded text-sm"><option value="2021" selected>2021年</option><option value="2022">2022年</option><option value="2023">2023年</option><option value="2024">2024年</option><option value="2025">2025年</option></select>
           <select id="start-month" class="w-full px-4 py-2 border rounded text-sm"><option value="01">1月</option><option value="04">4月</option><option value="07">7月</option><option value="10">10月</option></select>
-          <button id="simulate-btn" class="bg-indigo-600 text-white font-bold py-2 rounded text-sm">実行</button>
+          <button id="simulate-btn" class="bg-indigo-600 text-white font-bold py-2 rounded text-sm hover:bg-indigo-700 transition">実行</button>
         </div>
-        <div id="simulation-results" class="space-y-2"></div>
+        <div id="simulation-results" class="space-y-4">
+             <div class="text-center py-6 text-slate-400 text-sm">設定を入力して「実行」を押してください</div>
+        </div>
       </div>
 
       <!-- ★ 参謀ノート (Local Storage) -->
@@ -134,14 +142,8 @@
 // --- CONFIGURATION ---
 // 監視対象と目標価格 (Target Price)
 const targets = {
-  NVDA: 130,   // 目標買い値 ($)
-  SMH: 220,
-  AVGO: 160,
-  PLTR: 60,
-  CRWD: 300,
-  BTC: 85000,
-  SILVER: 28,
-  GOLD: 250
+  NVDA: 130, SMH: 220, AVGO: 160, PLTR: 60, CRWD: 300,
+  BTC: 85000, SILVER: 28, GOLD: 250
 };
 
 // =========================================================
@@ -197,10 +199,10 @@ let currentPrices = {};
 // --- FUNCTIONS ---
 async function fetchRealtimeData() {
   const tickerArea = document.getElementById('ticker-area');
-  tickerArea.innerHTML = '<span class="text-indigo-400 animate-pulse">Fetching data...</span>';
+  tickerArea.innerHTML = '<span class="text-indigo-400 animate-pulse text-sm">Fetching data...</span>';
   
   // ★重要：ここにFinnhub APIキーを入れてください
-  const API_KEY = 'd56ohg9r01qkgd82vfigd56ohg9r01qkgd82vfj0'; 
+  const API_KEY = 'YOUR_API_KEY'; 
 
   const stocks = ['NVDA', 'SMH', 'AVGO', 'PLTR', 'CRWD', 'ITA', 'GLD', 'SLV'];
   let html = '';
@@ -214,7 +216,7 @@ async function fetchRealtimeData() {
         currentPrices[symbol] = data.c; // 価格を保存
         const color = data.dp >= 0 ? 'text-emerald-400' : 'text-rose-400';
         const sign = data.dp >= 0 ? '+' : '';
-        html += `<div class="flex items-center gap-1 mr-4"><span class="font-bold text-slate-300">${symbol}</span><span class="font-mono text-white">$${data.c}</span><span class="font-mono text-[10px] ${color}">(${sign}${data.dp.toFixed(2)}%)</span></div>`;
+        html += `<div class="flex items-center gap-1 mr-4 shrink-0"><span class="font-bold text-slate-300 text-sm">${symbol}</span><span class="font-mono text-white text-sm">$${data.c}</span><span class="font-mono text-[10px] ${color}">(${sign}${data.dp.toFixed(2)}%)</span></div>`;
       }
     }
     // BTC
@@ -224,16 +226,14 @@ async function fetchRealtimeData() {
       currentPrices['BTC'] = btcData.bitcoin.usd; // 価格を保存
       const color = btcData.bitcoin.usd_24h_change >= 0 ? 'text-emerald-400' : 'text-rose-400';
       const sign = btcData.bitcoin.usd_24h_change >= 0 ? '+' : '';
-      html += `<div class="flex items-center gap-1 mr-4 border-l border-slate-700 pl-4"><span class="font-bold text-orange-400">BTC</span><span class="font-mono text-white">$${btcData.bitcoin.usd.toLocaleString()}</span><span class="font-mono text-[10px] ${color}">(${sign}${btcData.bitcoin.usd_24h_change.toFixed(2)}%)</span></div>`;
+      html += `<div class="flex items-center gap-1 mr-4 border-l border-slate-700 pl-4 shrink-0"><span class="font-bold text-orange-400 text-sm">BTC</span><span class="font-mono text-white text-sm">$${btcData.bitcoin.usd.toLocaleString()}</span><span class="font-mono text-[10px] ${color}">(${sign}${btcData.bitcoin.usd_24h_change.toFixed(2)}%)</span></div>`;
     }
     tickerArea.innerHTML = html;
-    
-    // RSI計算用（ターゲットとの距離）の更新
     updateRsiTable();
 
   } catch (e) {
     console.error(e);
-    tickerArea.innerHTML = '<span class="text-rose-500">API Error (Check Key)</span>';
+    tickerArea.innerHTML = '<span class="text-rose-500 text-sm">API Error (Check Key)</span>';
   }
 }
 
@@ -242,18 +242,15 @@ function updateRsiTable() {
   tbody.innerHTML = '';
   
   Object.keys(targets).forEach(key => {
-    // ターゲットとの距離計算
     let distanceStr = '-';
-    let currentP = currentPrices[key]; // APIで取得した価格
+    let currentP = currentPrices[key];
     
-    // API未取得なら距離は計算できない
     if(currentP) {
       const dist = ((currentP - targets[key]) / targets[key]) * 100;
-      const color = dist > 0 ? 'text-rose-500' : 'text-emerald-500'; // プラスならターゲットより高い（まだ）、マイナスなら安い（チャンス）
+      const color = dist > 0 ? 'text-rose-500' : 'text-emerald-500';
       distanceStr = `<span class="${color} font-bold">${dist > 0 ? '+' : ''}${dist.toFixed(1)}%</span>`;
     }
 
-    // RSI入力欄
     const row = document.createElement('tr');
     row.className = "border-b border-slate-50 hover:bg-slate-50/50 transition";
     row.innerHTML = `
@@ -275,7 +272,6 @@ function checkRsi(input) {
   
   if (val && val < 35) {
     cell.innerHTML = '<span class="px-2 py-1 rounded bg-emerald-100 text-emerald-600 signal-buy">🟢 BUY</span>';
-    // ここでプランナーへの連携リンクなどを出すのも可
   } else if (val && val > 70) {
     cell.innerHTML = '<span class="px-2 py-1 rounded bg-rose-100 text-rose-600 signal-sell">🔴 WAIT</span>';
   } else {
@@ -284,7 +280,7 @@ function checkRsi(input) {
 }
 
 // ----------------------------------------
-//  Memo Logic (Local Storage)
+//  Memo Logic
 // ----------------------------------------
 const memoPad = document.getElementById('memo-pad');
 const saveStatus = document.getElementById('save-status');
@@ -298,7 +294,7 @@ memoPad.addEventListener('input', () => {
 });
 
 // ----------------------------------------
-//  Chart Logic (Existing)
+//  Chart Logic
 // ----------------------------------------
 function initPortfolioChart() {
     new Chart(document.getElementById('portfolioChart'), {
@@ -337,6 +333,20 @@ const customLabelPlugin = {
   }
 };
 
+const negativeZonePlugin = {
+  id: 'negativeZone',
+  beforeDraw: (chart) => {
+    const { ctx, chartArea, scales } = chart;
+    const zeroPixel = scales.y.getPixelForValue(0);
+    if (zeroPixel < chartArea.bottom) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(220, 38, 38, 0.05)'; 
+        ctx.fillRect(chartArea.left, zeroPixel, chartArea.width, chartArea.bottom - zeroPixel);
+        ctx.restore();
+    }
+  }
+};
+
 function init() {
   initPortfolioChart();
   createAssetToggles();
@@ -344,8 +354,8 @@ function init() {
   setupSimulationListeners();
   updateDashboard();
   
-  // ★追加：ページ読み込み時にリアルタイムデータを取得
-  fetchRealtimeData(); 
+  // ★自動実行 (開発中はコメントアウト推奨)
+  // fetchRealtimeData();
 }
 
 function createAssetToggles() {
@@ -415,15 +425,19 @@ function updateRanking(keys, startIdx) {
 function setupSimulationListeners() {
   document.getElementById('simulate-btn').addEventListener('click', () => {
     const amount = parseInt(document.getElementById('monthly-amount').value);
-    const date = document.getElementById('start-year').value + '/' + document.getElementById('start-month').value;
-    const startIdx = labels.indexOf(date);
+    const startY = document.getElementById('start-year').value;
+    const startM = document.getElementById('start-month').value;
+    const startDate = `${startY}/${startM}`;
+    const startIdx = labels.indexOf(startDate);
+
+    if (startIdx === -1) { alert('開始日がデータ範囲外です'); return; }
+
     const results = activeKeys.map(key => {
       const data = db[key];
-      if (startIdx === -1 || startIdx >= data.length) return null;
       let totalUnits = 0, totalInv = 0;
       for (let i = startIdx; i < data.length; i++) { totalUnits += amount / data[i]; totalInv += amount; }
       const curVal = totalUnits * data[data.length-1];
-      return { label: meta[key].label, color: meta[key].color, currentValue: curVal, profitPerc: ((curVal - totalInv) / totalInv) * 100 };
+      return { label: meta[key].label, color: meta[key].color, totalInvestment: totalInv, currentValue: curVal, profitPerc: ((curVal - totalInv) / totalInv) * 100, totalUnits: totalUnits };
     }).filter(r => r).sort((a,b) => b.profitPerc - a.profitPerc);
     
     document.getElementById('simulation-results').innerHTML = results.map((r, index) => `
@@ -454,7 +468,7 @@ function setupSimulationListeners() {
             </div>
             <div>
                 <div class="text-[10px] text-slate-400 uppercase tracking-wide">取得単価目安</div>
-                <div class="font-bold text-slate-700">¥${Math.floor(r.totalInvestment / (r.currentValue/db[Object.keys(meta).find(k => meta[k].label === r.label)][db[Object.keys(meta).find(k => meta[k].label === r.label)].length-1])).toLocaleString()}</div>
+                <div class="font-bold text-slate-700">¥${Math.floor(r.totalInvestment / r.totalUnits).toLocaleString()}</div>
             </div>
         </div>
       </div>`).join('');
@@ -465,7 +479,7 @@ function renderChart() {
   myChart = new Chart(document.getElementById('chart'), {
     type: 'line',
     data: { labels: [], datasets: [] },
-    plugins: [customLabelPlugin],
+    plugins: [customLabelPlugin, negativeZonePlugin],
     options: {
       responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'nearest', axis: 'x', intersect: false },
