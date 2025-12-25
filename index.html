@@ -29,7 +29,7 @@
 </head>
 <body class="p-3 md:p-8 max-w-[1600px] mx-auto bg-slate-50 pb-20">
 
-  <!-- ★リアルタイム・マーケットバー (文字サイズUP + スクロール) -->
+  <!-- ★リアルタイム・マーケットバー -->
   <div class="bg-slate-900 text-white py-3 px-4 flex justify-between items-center sticky top-0 z-50 shadow-md rounded-b-lg mb-6">
     <div class="flex items-center gap-6 overflow-x-auto whitespace-nowrap scrollbar-hide w-full mr-4" id="ticker-area">
       <span class="text-slate-400 font-mono text-xs shrink-0">MARKET DATA:</span>
@@ -46,7 +46,7 @@
     <div class="flex justify-between items-start mb-4">
       <h3 class="text-sm font-bold flex items-center">
         <span class="mr-2 text-indigo-900">📊 2026 Target Portfolio</span>
-        <span class="text-[10px] bg-indigo-200 px-2 py-0.5 rounded text-indigo-800 font-extrabold">Rational Greed v5.0</span>
+        <span class="text-[10px] bg-indigo-200 px-2 py-0.5 rounded text-indigo-800 font-extrabold">Rational Greed v5.1</span>
       </h3>
       <div class="text-[10px] text-slate-500 bg-white px-2 py-1 rounded border border-slate-200 font-medium">戦略: 待機で機会を買い、需給で利益を取る</div>
     </div>
@@ -62,21 +62,55 @@
     </div>
   </div>
 
+  <header class="mb-6 md:mb-10 border-b border-slate-200 pb-6 flex justify-between items-end">
+    <div>
+      <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">資産パフォーマンス推移</h1>
+      <p class="text-slate-500 font-medium text-xs md:text-sm">2021.01 - 2025.11 (円建て・為替/分割反映済み)</p>
+    </div>
+    <div class="text-xl font-bold text-slate-700 font-mono hidden md:block">2025.12.25</div>
+  </header>
+
+  <!-- 期間選択ボタン (フルセット) -->
+  <div class="mb-6">
+    <div class="overflow-x-auto pb-2 -mx-3 px-3 md:mx-0 md:px-0 scroll-fade-right">
+      <div class="flex gap-2 min-w-max">
+        <button class="period-btn active px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="all">全期間</button>
+        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2021">2021年〜</button>
+        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2022">2022年〜</button>
+        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2023">2023年〜</button>
+        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2024">2024年〜</button>
+        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2025">2025年〜</button>
+      </div>
+    </div>
+  </div>
+
   <!-- メインエリア -->
   <div class="flex flex-col lg:grid lg:grid-cols-4 gap-6">
     
     <!-- チャート & シミュレーション -->
     <div class="lg:col-span-3 order-1 space-y-6">
-      <!-- 期間選択 -->
-      <div class="overflow-x-auto flex gap-2 pb-1">
-        <button class="period-btn active px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="all">全期間</button>
-        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2022">2022年〜</button>
-        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2024">2024年〜</button>
-        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2025">2025年〜</button>
+      <div class="card h-[55vh] md:h-[650px] relative p-1 md:p-6 w-full">
+        <canvas id="chart"></canvas>
+      </div>
+      
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-3 gap-2 md:gap-4 text-center">
+        <div class="card bg-gradient-to-br from-indigo-50 to-white py-4 px-2">
+          <div class="text-[10px] text-indigo-400 font-bold uppercase mb-1">Top</div>
+          <div id="summary-best-name" class="text-xs md:text-sm font-black text-indigo-900 truncate">-</div>
+          <div id="summary-best-val" class="text-xs font-bold text-indigo-600">-</div>
+        </div>
+        <div class="card bg-white py-4 px-2 flex flex-col justify-center">
+          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Avg Change</div>
+          <div id="summary-avg" class="text-sm md:text-lg font-black text-slate-700">-</div>
+        </div>
+        <div class="card bg-white py-4 px-2 text-right">
+          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Bottom</div>
+          <div id="summary-worst-name" class="text-xs md:text-sm font-black text-slate-700 truncate">-</div>
+          <div id="summary-worst-val" class="text-xs font-bold text-slate-500">-</div>
+        </div>
       </div>
 
-      <div class="card h-[50vh] relative p-2 w-full"><canvas id="chart"></canvas></div>
-      
       <!-- ★ RSIコックピット (手動入力 & ターゲット) -->
       <div class="card">
         <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center">
@@ -193,7 +227,6 @@ let myChart = null;
 let currentPeriod = 'all';
 let activeKeys = Object.keys(db).filter(k => k !== 'SP500'); 
 let selectedAssetKey = null;
-// 現在価格のキャッシュ
 let currentPrices = {}; 
 
 // --- FUNCTIONS ---
@@ -213,7 +246,7 @@ async function fetchRealtimeData() {
       const response = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`);
       const data = await response.json();
       if(data.c) {
-        currentPrices[symbol] = data.c; // 価格を保存
+        currentPrices[symbol] = data.c; 
         const color = data.dp >= 0 ? 'text-emerald-400' : 'text-rose-400';
         const sign = data.dp >= 0 ? '+' : '';
         html += `<div class="flex items-center gap-1 mr-4 shrink-0"><span class="font-bold text-slate-300 text-sm">${symbol}</span><span class="font-mono text-white text-sm">$${data.c}</span><span class="font-mono text-[10px] ${color}">(${sign}${data.dp.toFixed(2)}%)</span></div>`;
@@ -223,7 +256,7 @@ async function fetchRealtimeData() {
     const btcRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,jpy&include_24hr_change=true');
     const btcData = await btcRes.json();
     if(btcData.bitcoin) {
-      currentPrices['BTC'] = btcData.bitcoin.usd; // 価格を保存
+      currentPrices['BTC'] = btcData.bitcoin.usd;
       const color = btcData.bitcoin.usd_24h_change >= 0 ? 'text-emerald-400' : 'text-rose-400';
       const sign = btcData.bitcoin.usd_24h_change >= 0 ? '+' : '';
       html += `<div class="flex items-center gap-1 mr-4 border-l border-slate-700 pl-4 shrink-0"><span class="font-bold text-orange-400 text-sm">BTC</span><span class="font-mono text-white text-sm">$${btcData.bitcoin.usd.toLocaleString()}</span><span class="font-mono text-[10px] ${color}">(${sign}${btcData.bitcoin.usd_24h_change.toFixed(2)}%)</span></div>`;
@@ -233,7 +266,7 @@ async function fetchRealtimeData() {
 
   } catch (e) {
     console.error(e);
-    tickerArea.innerHTML = '<span class="text-rose-500 text-sm">API Error (Check Key)</span>';
+    tickerArea.innerHTML = '<span class="text-rose-500 text-sm">API Error</span>';
   }
 }
 
@@ -354,7 +387,7 @@ function init() {
   setupSimulationListeners();
   updateDashboard();
   
-  // ★修正：0.5秒待ってから自動実行（これで確実に動きます）
+  // ★修正：0.5秒待ってから自動実行
   setTimeout(fetchRealtimeData, 500);
 }
 
