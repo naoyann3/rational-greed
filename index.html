@@ -278,7 +278,7 @@ async function fetchRealtimeData() {
         currentPrices[symbol] = data.c; 
         const color = data.dp >= 0 ? 'text-emerald-400' : 'text-rose-400';
         const sign = data.dp >= 0 ? '+' : '';
-        html += `<div class="flex items-center gap-1 mr-4 shrink-0"><span class="font-bold text-slate-300 text-sm">${symbol}</span><span class="font-mono text-white text-sm">$${data.c}</span><span class="font-mono text-[10px] ${color}">(${sign}${data.dp.toFixed(2)}%)</span></div>`;
+       html += `<div class="flex items-center gap-1 mr-4 shrink-0"><a href="https://finviz.com/quote.ashx?t=${symbol}" target="_blank" class="font-bold text-slate-300 text-sm hover:text-indigo-400 hover:underline transition">${symbol}</a><span class="font-mono text-white text-sm">$${data.c}</span><span class="font-mono text-[10px] ${color}">(${sign}${data.dp.toFixed(2)}%)</span></div>`;
       }
     }
     const btcRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,jpy&include_24hr_change=true');
@@ -287,8 +287,8 @@ async function fetchRealtimeData() {
       currentPrices['BTC'] = btcData.bitcoin.usd;
       const color = btcData.bitcoin.usd_24h_change >= 0 ? 'text-emerald-400' : 'text-rose-400';
       const sign = btcData.bitcoin.usd_24h_change >= 0 ? '+' : '';
-      html += `<div class="flex items-center gap-1 mr-4 border-l border-slate-700 pl-4 shrink-0"><span class="font-bold text-orange-400 text-sm">BTC</span><span class="font-mono text-white text-sm">$${btcData.bitcoin.usd.toLocaleString()}</span><span class="font-mono text-[10px] ${color}">(${sign}${btcData.bitcoin.usd_24h_change.toFixed(2)}%)</span></div>`;
-    }
+      // BTCの部分（修正後）
+      html += `<div class="flex items-center gap-1 mr-4 border-l border-slate-700 pl-4 shrink-0"><a href="https://www.coingecko.com/en/coins/bitcoin" target="_blank" class="font-bold text-orange-400 text-sm hover:text-orange-300 hover:underline transition">BTC</a><span class="font-mono text-white text-sm">$${btcData.bitcoin.usd.toLocaleString()}</span>...`;
     tickerArea.innerHTML = html;
     updateRsiTable();
 
