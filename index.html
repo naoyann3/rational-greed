@@ -13,21 +13,10 @@
   .asset-checkbox:checked + div { background-color: #f1f5f9; border-color: currentColor; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
   .period-btn { transition: all 0.2s; }
   .period-btn.active { background-color: #0f172a; color: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
-  
-  /* スクロールバーをカスタマイズ（PCで見やすく） */
-  #ticker-area::-webkit-scrollbar {
-    height: 4px; /* 高さを指定 */
-  }
-  #ticker-area::-webkit-scrollbar-track {
-    background: #1e293b; /* トラックの色 */
-  }
-  #ticker-area::-webkit-scrollbar-thumb {
-    background: #475569; /* つまみの色 */
-    border-radius: 2px;
-  }
-  #ticker-area::-webkit-scrollbar-thumb:hover {
-    background: #64748b; /* ホバー時の色 */
-  }
+  /* スクロールバー */
+  .scrollbar-hide::-webkit-scrollbar { height: 4px; }
+  .scrollbar-hide::-webkit-scrollbar-track { background: #1e293b; }
+  .scrollbar-hide::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
   
   /* RSIシグナルのアニメーション */
   @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
@@ -41,23 +30,13 @@
 </head>
 <body class="p-3 md:p-8 max-w-[1600px] mx-auto bg-slate-50 pb-20">
 
-<!-- ★リアルタイム・マーケットバー (視認性改善版) -->
-  <div class="bg-slate-900 text-white py-4 px-4 flex justify-between items-center sticky top-0 z-50 shadow-md rounded-b-lg mb-6 relative overflow-hidden">
-    
-    <!-- ティッカーエリア -->
-    <div class="flex items-center gap-6 overflow-x-auto whitespace-nowrap w-full mr-4 pb-2" id="ticker-area">
-    <!-- scrollbar-hide を削除し、pb-2 (padding-bottom) を追加してスクロールバーのスペースを確保 -->
+  <!-- ★リアルタイム・マーケットバー -->
+  <div class="bg-slate-900 text-white py-3 px-4 flex justify-between items-center sticky top-0 z-50 shadow-md rounded-b-lg mb-6 relative overflow-hidden">
+    <div class="flex items-center gap-6 overflow-x-auto whitespace-nowrap scrollbar-hide w-full mr-4 pb-2" id="ticker-area">
       <span class="text-slate-400 font-mono text-xs shrink-0">MARKET DATA:</span>
-      <span class="text-slate-500 text-sm animate-pulse">Waiting for update...</span>
+      <span class="text-slate-500 text-sm">Ready to fetch...</span>
     </div>
-
-    <!-- フェードアウト & スクロールヒント -->
     <div class="absolute right-20 top-0 bottom-0 w-12 bg-gradient-to-r from-transparent to-slate-900 pointer-events-none"></div>
-    <div class="absolute right-24 top-1/2 -translate-y-1/2 text-slate-500 text-xs animate-bounce pointer-events-none">
-        >>>
-    </div>
-
-    <!-- 更新ボタン -->
     <button onclick="fetchRealtimeData()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded font-bold transition flex items-center gap-1 shrink-0 text-xs z-10">
       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
       更新
@@ -116,23 +95,22 @@
         <canvas id="chart"></canvas>
       </div>
       
-<!-- Summary Cards (Colorful & Centered) -->
+      <!-- Summary Cards -->
       <div class="grid grid-cols-3 gap-2 md:gap-4 text-center">
-        
-        <!-- TOP: 緑系 (Emerald) でポジティブ感を強調 -->
+        <!-- TOP: 緑系 -->
         <div class="card bg-emerald-50 border-2 border-emerald-100 py-4 px-2 flex flex-col justify-center shadow-sm">
           <div class="text-[10px] text-emerald-600 font-bold uppercase mb-1 tracking-widest">👑 Top Asset</div>
           <div id="summary-best-name" class="text-sm md:text-lg font-black text-emerald-900 truncate">-</div>
           <div id="summary-best-val" class="text-xs md:text-sm font-bold text-emerald-600 bg-white rounded-full px-2 py-0.5 mx-auto mt-1 w-max shadow-sm">-</div>
         </div>
         
-        <!-- AVG: グレーで落ち着かせる (変更なし) -->
+        <!-- AVG: グレー -->
         <div class="card bg-slate-50 border border-slate-200 py-4 px-2 flex flex-col justify-center">
           <div class="text-[10px] text-slate-400 font-bold uppercase mb-1 tracking-widest">Average</div>
           <div id="summary-avg" class="text-sm md:text-lg font-black text-slate-700">-</div>
         </div>
         
-        <!-- BOTTOM: 赤系 (Rose) を濃くして警告感を強化 -->
+        <!-- BOTTOM: 赤系 -->
         <div class="card bg-rose-100 border-2 border-rose-200 py-4 px-2 flex flex-col justify-center shadow-sm">
           <div class="text-[10px] text-rose-600 font-bold uppercase mb-1 tracking-widest">⚠️ Bottom</div>
           <div id="summary-worst-name" class="text-sm md:text-lg font-black text-rose-900 truncate">-</div>
@@ -165,21 +143,40 @@
         <p class="text-[10px] text-slate-400 mt-2 text-right">※RSI < 35: 買い場 (Grok) / RSI > 70: 過熱 (DeepSeek)</p>
       </div>
 
-      <!-- 積立シミュレーション -->
+      <!-- 積立シミュレーション (金額カンマ対応) -->
       <div class="card">
         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4"><span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded mr-2">SIM</span> 積立シミュレーション (詳細版)</h3>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-          <input type="tel" id="monthly-amount" value="20,000" class="w-full px-4 py-2 border rounded text-sm">
-          <select id="start-year" class="w-full px-4 py-2 border rounded text-sm"><option value="2021" selected>2021年</option><option value="2022">2022年</option><option value="2023">2023年</option><option value="2024">2024年</option><option value="2025">2025年</option></select>
-          <select id="start-month" class="w-full px-4 py-2 border rounded text-sm"><option value="01">1月</option><option value="04">4月</option><option value="07">7月</option><option value="10">10月</option></select>
-          <button id="simulate-btn" class="bg-indigo-600 text-white font-bold py-2 rounded text-sm hover:bg-indigo-700 transition">実行</button>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 mb-1">月々の積立額 (円)</label>
+            <input type="tel" id="monthly-amount" value="20,000" class="w-full px-4 py-2 border rounded-lg font-medium text-sm">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 mb-1">開始年</label>
+            <select id="start-year" class="w-full px-4 py-2 border rounded-lg font-medium text-sm">
+                <option value="2021" selected>2021年</option>
+                <option value="2022">2022年</option>
+                <option value="2023">2023年</option>
+                <option value="2024">2024年</option>
+                <option value="2025">2025年</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 mb-1">開始月</label>
+            <select id="start-month" class="w-full px-4 py-2 border rounded-lg font-medium text-sm">
+                <option value="01">1月</option><option value="04">4月</option><option value="07">7月</option><option value="10">10月</option>
+            </select>
+          </div>
+          <div class="flex items-end">
+            <button id="simulate-btn" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg text-sm hover:bg-indigo-700 transition">実行</button>
+          </div>
         </div>
         <div id="simulation-results" class="space-y-4">
              <div class="text-center py-6 text-slate-400 text-sm">設定を入力して「実行」を押してください</div>
         </div>
       </div>
 
-      <!-- ★ 参謀ノート (Local Storage) -->
+      <!-- ★ 参謀ノート -->
       <div class="card bg-slate-50 border-slate-200">
         <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex justify-between">
           <span>📝 参謀ノート (三賢者の助言)</span>
@@ -204,15 +201,11 @@
 
 <script>
 // --- CONFIGURATION ---
-// 監視対象と目標価格 (Target Price)
 const targets = {
   NVDA: 130, SMH: 220, AVGO: 160, PLTR: 60, CRWD: 300,
   BTC: 85000, SLV: 28, GLD: 250
 };
 
-// =========================================================
-//  DATA DEFINITION (Real 円建て Data)
-// =========================================================
 const db = {
   ASML: [55915,60412,68098,70580,74238,76361,84088,91588,83404,92534,90076,91606,78055,76972,81501,73110,73641,64999,76531,67971,60002,69829,84373,71638,86226,84207,90671,86716,100989,104931,101416,105156,87928,89288,100539,106740,128184,143376,146870,136371,150730,164536,156139,132100,119022,127814,158615,108753,113925,106371,99140,95067,106124,115814,109945,107270,144464,163015,165519],
   TSM: [12720,13416,13046,12713,12898,13281,12791,13084,12497,12942,13332,13843,14134,12368,12722,12051,12177,11166,11788,11563,9902,9097,11513,9766,13599,11874,12390,11491,13782,14611,14207,14382,13978,12869,14308,14666,16646,19385,20589,21468,23706,27962,25312,25093,24787,29191,27652,31004,32255,27081,24836,23720,27845,32731,33816,33221,41501,46236,45519],
@@ -241,7 +234,7 @@ const meta = {
   BTC:    { label:'BTC (デジタル金)', color:'#f97316', type:'crypto' },
   ITA:    { label:'ITA (防衛)', color:'#eab308', type:'stock' },
   GOLD:   { label:'GLD (金/有事)', color:'#ca8a04', type:'commodity' },
-  SILVER: { label:'SLV (銀/実需)', color:'#64748b', type:'commodity' },
+  SILVER: { label:'Silver (銀)', color:'#64748b', type:'commodity' },
   SP500:  { label:'S&P 500', color:'#cbd5e1', type:'index' }
 };
 
@@ -259,12 +252,11 @@ let activeKeys = Object.keys(db).filter(k => k !== 'SP500');
 let selectedAssetKey = null;
 let currentPrices = {}; 
 
-// --- FUNCTIONS ---
 async function fetchRealtimeData() {
   const tickerArea = document.getElementById('ticker-area');
   tickerArea.innerHTML = '<span class="text-indigo-400 animate-pulse text-sm">Fetching data...</span>';
   
-  // ★重要：ここにFinnhub APIキーを入れてください
+  // ★ API KEY (あなたのキーをここに記述)
   const API_KEY = 'd56ohg9r01qkgd82vfigd56ohg9r01qkgd82vfj0'; 
 
   const stocks = ['NVDA', 'SMH', 'AVGO', 'PLTR', 'CRWD', 'ITA', 'GLD', 'SLV'];
@@ -278,7 +270,7 @@ async function fetchRealtimeData() {
         currentPrices[symbol] = data.c; 
         const color = data.dp >= 0 ? 'text-emerald-400' : 'text-rose-400';
         const sign = data.dp >= 0 ? '+' : '';
-       html += `<div class="flex items-center gap-1 mr-4 shrink-0"><a href="https://finviz.com/quote.ashx?t=${symbol}" target="_blank" class="font-bold text-slate-300 text-sm hover:text-indigo-400 hover:underline transition">${symbol}</a><span class="font-mono text-white text-sm">$${data.c}</span><span class="font-mono text-[10px] ${color}">(${sign}${data.dp.toFixed(2)}%)</span></div>`;
+        html += `<div class="flex items-center gap-1 mr-4 shrink-0"><a href="https://finviz.com/quote.ashx?t=${symbol}" target="_blank" class="font-bold text-slate-300 text-sm hover:text-indigo-400 hover:underline transition">${symbol}</a><span class="font-mono text-white text-sm">$${data.c}</span><span class="font-mono text-[10px] ${color}">(${sign}${data.dp.toFixed(2)}%)</span></div>`;
       }
     }
     const btcRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,jpy&include_24hr_change=true');
@@ -287,8 +279,8 @@ async function fetchRealtimeData() {
       currentPrices['BTC'] = btcData.bitcoin.usd;
       const color = btcData.bitcoin.usd_24h_change >= 0 ? 'text-emerald-400' : 'text-rose-400';
       const sign = btcData.bitcoin.usd_24h_change >= 0 ? '+' : '';
-      // BTCの部分（修正後）
-      html += `<div class="flex items-center gap-1 mr-4 border-l border-slate-700 pl-4 shrink-0"><a href="https://www.coingecko.com/en/coins/bitcoin" target="_blank" class="font-bold text-orange-400 text-sm hover:text-orange-300 hover:underline transition">BTC</a><span class="font-mono text-white text-sm">$${btcData.bitcoin.usd.toLocaleString()}</span>...`;
+      html += `<div class="flex items-center gap-1 mr-4 border-l border-slate-700 pl-4 shrink-0"><a href="https://www.coingecko.com/en/coins/bitcoin" target="_blank" class="font-bold text-orange-400 text-sm hover:text-orange-300 hover:underline transition">BTC</a><span class="font-mono text-white text-sm">$${btcData.bitcoin.usd.toLocaleString()}</span><span class="font-mono text-[10px] ${color}">(${sign}${btcData.bitcoin.usd_24h_change.toFixed(2)}%)</span></div>`;
+    }
     tickerArea.innerHTML = html;
     updateRsiTable();
 
@@ -343,14 +335,10 @@ function checkRsi(input) {
   }
 }
 
-const memoPad = document.getElementById('memo-pad');
-const saveStatus = document.getElementById('save-status');
-memoPad.value = localStorage.getItem('rational_greed_memo') || '';
-memoPad.addEventListener('input', () => {
-  localStorage.setItem('rational_greed_memo', memoPad.value);
-  saveStatus.classList.remove('hidden');
-  setTimeout(() => saveStatus.classList.add('hidden'), 2000);
-});
+// カンマフォーマット
+const amountInput = document.getElementById('monthly-amount');
+amountInput.addEventListener('focus', function() { this.value = this.value.replace(/,/g, ''); });
+amountInput.addEventListener('blur', function() { const num = this.value.replace(/[^0-9]/g, ''); if(num) this.value = Number(num).toLocaleString(); });
 
 function initPortfolioChart() {
     new Chart(document.getElementById('portfolioChart'), {
@@ -410,7 +398,7 @@ function init() {
   setupSimulationListeners();
   updateDashboard();
   
-  // ★修正：0.5秒待ってから自動実行
+  // ★自動実行：ページ読み込み0.5秒後に実行
   setTimeout(fetchRealtimeData, 500);
 }
 
@@ -480,8 +468,7 @@ function updateRanking(keys, startIdx) {
 
 function setupSimulationListeners() {
   document.getElementById('simulate-btn').addEventListener('click', () => {
-    // カンマを除去してから数値に変換
-    const amount = parseInt(document.getElementById('monthly-amount').value.replace(/,/g, ''));  
+    const amount = parseInt(document.getElementById('monthly-amount').value.replace(/,/g, ''));
     const date = document.getElementById('start-year').value + '/' + document.getElementById('start-month').value;
     const startIdx = labels.indexOf(date);
     const results = activeKeys.map(key => {
@@ -543,25 +530,6 @@ function renderChart() {
   });
 }
 
-  // --- カンマ区切りフォーマット機能 ---
-const amountInput = document.getElementById('monthly-amount');
-
-// 初期表示時にカンマを入れる
-amountInput.value = Number(amountInput.value.replace(/,/g, '')).toLocaleString();
-
-// 入力中はカンマを外す（編集しやすくするため）
-amountInput.addEventListener('focus', function() {
-  this.value = this.value.replace(/,/g, '');
-});
-
-// 入力確定時にカンマを入れる
-amountInput.addEventListener('blur', function() {
-  const num = this.value.replace(/[^0-9]/g, ''); // 数字以外を除去
-  if(num) {
-    this.value = Number(num).toLocaleString();
-  }
-});
-  
 init();
 </script>
 </body>
