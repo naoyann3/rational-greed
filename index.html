@@ -224,39 +224,49 @@ async function fetchRealtimeData() {
   const tickerArea = document.getElementById('ticker-area');
   tickerArea.innerHTML = '<span class="text-indigo-400 animate-pulse text-sm">Fetching data...</span>';
   
-  // ★重要：ここにFinnhub APIキーを入れてください
+  // ★あなたのAPIキー
   const API_KEY = 'd56ohg9r01qkgd82vfigd56ohg9r01qkgd82vfj0'; 
 
+  // 監視対象リスト (米国株 + ETF)
   const stocks = ['NVDA', 'SMH', 'AVGO', 'PLTR', 'CRWD', 'ITA', 'GLD', 'SLV'];
   let html = '';
   
   try {
-    // 米国株
+    // 1. 米国株 & ETF (Finnhub)
     for (const symbol of stocks) {
+      // 念のため、ETFも同じエンドポイントで取得
       const response = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`);
       const data = await response.json();
+      
+      // データが取れた場合のみ表示 & 保存
       if(data.c) {
-        currentPrices[symbol] = data.c; 
+        currentPrices[symbol] = data.c; // 価格を保存 (ここが重要！)
         const color = data.dp >= 0 ? 'text-emerald-400' : 'text-rose-400';
         const sign = data.dp >= 0 ? '+' : '';
         html += `<div class="flex items-center gap-1 mr-4 shrink-0"><span class="font-bold text-slate-300 text-sm">${symbol}</span><span class="font-mono text-white text-sm">$${data.c}</span><span class="font-mono text-[10px] ${color}">(${sign}${data.dp.toFixed(2)}%)</span></div>`;
+      } else {
+        console.warn(`Failed to fetch ${symbol}`);
       }
     }
-    // BTC
+
+    // 2. Bitcoin (CoinGecko)
     const btcRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,jpy&include_24hr_change=true');
     const btcData = await btcRes.json();
     if(btcData.bitcoin) {
-      currentPrices['BTC'] = btcData.bitcoin.usd;
+      currentPrices['BTC'] = btcData.bitcoin.usd; // 価格を保存
       const color = btcData.bitcoin.usd_24h_change >= 0 ? 'text-emerald-400' : 'text-rose-400';
       const sign = btcData.bitcoin.usd_24h_change >= 0 ? '+' : '';
       html += `<div class="flex items-center gap-1 mr-4 border-l border-slate-700 pl-4 shrink-0"><span class="font-bold text-orange-400 text-sm">BTC</span><span class="font-mono text-white text-sm">$${btcData.bitcoin.usd.toLocaleString()}</span><span class="font-mono text-[10px] ${color}">(${sign}${btcData.bitcoin.usd_24h_change.toFixed(2)}%)</span></div>`;
     }
+
     tickerArea.innerHTML = html;
+    
+    // コックピット内のターゲット計算を更新
     updateRsiTable();
 
   } catch (e) {
     console.error(e);
-    tickerArea.innerHTML = '<span class="text-rose-500 text-sm">API Error</span>';
+    tickerArea.innerHTML = '<span class="text-rose-500 text-sm">API Error (Check Console)</span>';
   }
 }
 
