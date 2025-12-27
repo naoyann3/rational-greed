@@ -62,6 +62,28 @@
     </div>
   </div>
 
+  <header class="mb-6 md:mb-10 border-b border-slate-200 pb-6 flex justify-between items-end">
+    <div>
+      <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">資産パフォーマンス推移</h1>
+      <p class="text-slate-500 font-medium text-xs md:text-sm">2021.01 - 2025.11 (円建て・為替/分割反映済み)</p>
+    </div>
+    <div class="text-xl font-bold text-slate-700 font-mono hidden md:block">2025.12.25</div>
+  </header>
+
+  <!-- 期間選択ボタン (フルセット) -->
+  <div class="mb-6">
+    <div class="overflow-x-auto pb-2 -mx-3 px-3 md:mx-0 md:px-0 scroll-fade-right">
+      <div class="flex gap-2 min-w-max">
+        <button class="period-btn active px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="all">全期間</button>
+        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2021">2021年〜</button>
+        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2022">2022年〜</button>
+        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2023">2023年〜</button>
+        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2024">2024年〜</button>
+        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2025">2025年〜</button>
+      </div>
+    </div>
+  </div>
+
   <!-- メインエリア -->
   <div class="flex flex-col lg:grid lg:grid-cols-4 gap-6">
     
@@ -71,25 +93,30 @@
         <canvas id="chart"></canvas>
       </div>
       
-      <!-- Summary Cards -->
+      <!-- Summary Cards (Colorful & Centered) -->
       <div class="grid grid-cols-3 gap-2 md:gap-4 text-center">
-        <div class="card bg-gradient-to-br from-indigo-50 to-white py-4 px-2">
-          <div class="text-[10px] text-indigo-400 font-bold uppercase mb-1">Top</div>
-          <div id="summary-best-name" class="text-xs md:text-sm font-black text-indigo-900 truncate">-</div>
-          <div id="summary-best-val" class="text-xs font-bold text-indigo-600">-</div>
+        <!-- TOP: 青系で強調 -->
+        <div class="card bg-indigo-50 border-2 border-indigo-100 py-4 px-2 flex flex-col justify-center shadow-sm">
+          <div class="text-[10px] text-indigo-500 font-bold uppercase mb-1 tracking-widest">👑 Top Asset</div>
+          <div id="summary-best-name" class="text-sm md:text-lg font-black text-indigo-900 truncate">-</div>
+          <div id="summary-best-val" class="text-xs md:text-sm font-bold text-indigo-600 bg-white rounded-full px-2 py-0.5 mx-auto mt-1 w-max shadow-sm">-</div>
         </div>
-        <div class="card bg-white py-4 px-2 flex flex-col justify-center">
-          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Avg Change</div>
+        
+        <!-- AVG: グレーで落ち着かせる -->
+        <div class="card bg-slate-50 border border-slate-200 py-4 px-2 flex flex-col justify-center">
+          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1 tracking-widest">Average</div>
           <div id="summary-avg" class="text-sm md:text-lg font-black text-slate-700">-</div>
         </div>
-        <div class="card bg-white py-4 px-2 text-right">
-          <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Bottom</div>
-          <div id="summary-worst-name" class="text-xs md:text-sm font-black text-slate-700 truncate">-</div>
-          <div id="summary-worst-val" class="text-xs font-bold text-slate-500">-</div>
+        
+        <!-- BOTTOM: 赤系で警戒 -->
+        <div class="card bg-rose-50 border-2 border-rose-100 py-4 px-2 flex flex-col justify-center shadow-sm">
+          <div class="text-[10px] text-rose-500 font-bold uppercase mb-1 tracking-widest">⚠️ Bottom</div>
+          <div id="summary-worst-name" class="text-sm md:text-lg font-black text-rose-900 truncate">-</div>
+          <div id="summary-worst-val" class="text-xs md:text-sm font-bold text-rose-600 bg-white rounded-full px-2 py-0.5 mx-auto mt-1 w-max shadow-sm">-</div>
         </div>
       </div>
 
-      <!-- ★ RSIコックピット (現在価格カラム追加) -->
+      <!-- ★ RSIコックピット (現在価格カラムあり) -->
       <div class="card">
         <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center">
           <span class="bg-slate-200 text-slate-700 px-2 py-1 rounded mr-2">RADAR</span> 戦況監視コックピット
@@ -99,7 +126,7 @@
             <thead class="text-xs text-slate-400 uppercase bg-slate-50">
               <tr>
                 <th class="p-3 w-20">銘柄</th>
-                <th class="p-3 w-24">現在価格</th> <!-- New Column -->
+                <th class="p-3 w-24">現在価格</th>
                 <th class="p-3 w-24">目標価格</th>
                 <th class="p-3 w-24">距離</th>
                 <th class="p-3 w-32">RSI (日足)</th>
@@ -146,17 +173,7 @@
       </div>
       <div class="card h-[400px] flex flex-col">
         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">騰落率ランキング</h3>
-        
-        <!-- 期間選択ボタン (フルセット) -->
-  <div class="mb-6">
-    <div class="overflow-x-auto pb-2 -mx-3 px-3 md:mx-0 md:px-0">
-      <div class="flex gap-2 min-w-max">
-        <button class="period-btn active px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="all">全期間</button>
-        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2021">2021年〜</button>
-        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2022">2022年〜</button>
-        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2023">2023年〜</button>
-        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2024">2024年〜</button>
-        <button class="period-btn px-4 py-2 rounded-full border border-slate-200 font-bold text-xs" data-period="2025">2025年〜</button>
+        <div class="flex-1 overflow-y-auto pr-1 space-y-1" id="ranking-list"></div>
       </div>
     </div>
   </div>
@@ -189,19 +206,19 @@ const db = {
 };
 
 const meta = {
-  ASML:   { label:'ASML (製造装置)', color:'#1e40af', type:'stock' },
-  TSM:    { label:'TSM (製造)',     color:'#3b82f6', type:'stock' },
-  NVDA:   { label:'NVDA (AI設計)',  color:'#84cc16', type:'stock' },
-  AMD:    { label:'AMD (対抗馬)',   color:'#ef4444', type:'stock' },
+  ASML:   { label:'ASML (装置)', color:'#1e40af', type:'stock' },
+  TSM:    { label:'TSM (製造)', color:'#3b82f6', type:'stock' },
+  NVDA:   { label:'NVDA (設計)', color:'#84cc16', type:'stock' },
+  AMD:    { label:'AMD (対抗)', color:'#ef4444', type:'stock' },
   SMH:    { label:'SMH (AI半導体)', color:'#4f46e5', type:'stock' },
-  AVGO:   { label:'AVGO (AI基盤)',  color:'#1e3a8a', type:'stock' }, // インフラ=基盤
-  PLTR:   { label:'PLTR (AI解析)',  color:'#a855f7', type:'stock' },
-  CRWD:   { label:'CRWD (サイバー)',color:'#06b6d4', type:'stock' },
-  BTC:    { label:'BTC (デジタル金)',color:'#f97316', type:'crypto' }, // 役割を強調
-  ITA:    { label:'ITA (防衛)',     color:'#eab308', type:'stock' },
-  GOLD:   { label:'GLD (金/有事)',  color:'#ca8a04', type:'commodity' },
-  SILVER: { label:'SLV (銀/実需)',  color:'#64748b', type:'commodity' },
-  SP500:  { label:'S&P 500',       color:'#cbd5e1', type:'index' }
+  AVGO:   { label:'AVGO (AI基盤)', color:'#1e3a8a', type:'stock' },
+  PLTR:   { label:'PLTR (AI解析)', color:'#a855f7', type:'stock' },
+  CRWD:   { label:'CRWD (サイバー)', color:'#06b6d4', type:'stock' },
+  BTC:    { label:'BTC (デジタル金)', color:'#f97316', type:'crypto' },
+  ITA:    { label:'ITA (防衛)', color:'#eab308', type:'stock' },
+  GOLD:   { label:'GLD (金/有事)', color:'#ca8a04', type:'commodity' },
+  SILVER: { label:'SLV (銀/実需)', color:'#64748b', type:'commodity' },
+  SP500:  { label:'S&P 500', color:'#cbd5e1', type:'index' }
 };
 
 const labels = [];
@@ -223,49 +240,37 @@ async function fetchRealtimeData() {
   const tickerArea = document.getElementById('ticker-area');
   tickerArea.innerHTML = '<span class="text-indigo-400 animate-pulse text-sm">Fetching data...</span>';
   
-  // ★あなたのAPIキー
+  // ★重要：ここにFinnhub APIキーを入れてください
   const API_KEY = 'd56ohg9r01qkgd82vfigd56ohg9r01qkgd82vfj0'; 
 
-  // 監視対象リスト (米国株 + ETF)
   const stocks = ['NVDA', 'SMH', 'AVGO', 'PLTR', 'CRWD', 'ITA', 'GLD', 'SLV'];
   let html = '';
   
   try {
-    // 1. 米国株 & ETF (Finnhub)
     for (const symbol of stocks) {
-      // 念のため、ETFも同じエンドポイントで取得
       const response = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`);
       const data = await response.json();
-      
-      // データが取れた場合のみ表示 & 保存
       if(data.c) {
-        currentPrices[symbol] = data.c; // 価格を保存 (ここが重要！)
+        currentPrices[symbol] = data.c; 
         const color = data.dp >= 0 ? 'text-emerald-400' : 'text-rose-400';
         const sign = data.dp >= 0 ? '+' : '';
         html += `<div class="flex items-center gap-1 mr-4 shrink-0"><span class="font-bold text-slate-300 text-sm">${symbol}</span><span class="font-mono text-white text-sm">$${data.c}</span><span class="font-mono text-[10px] ${color}">(${sign}${data.dp.toFixed(2)}%)</span></div>`;
-      } else {
-        console.warn(`Failed to fetch ${symbol}`);
       }
     }
-
-    // 2. Bitcoin (CoinGecko)
     const btcRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,jpy&include_24hr_change=true');
     const btcData = await btcRes.json();
     if(btcData.bitcoin) {
-      currentPrices['BTC'] = btcData.bitcoin.usd; // 価格を保存
+      currentPrices['BTC'] = btcData.bitcoin.usd;
       const color = btcData.bitcoin.usd_24h_change >= 0 ? 'text-emerald-400' : 'text-rose-400';
       const sign = btcData.bitcoin.usd_24h_change >= 0 ? '+' : '';
       html += `<div class="flex items-center gap-1 mr-4 border-l border-slate-700 pl-4 shrink-0"><span class="font-bold text-orange-400 text-sm">BTC</span><span class="font-mono text-white text-sm">$${btcData.bitcoin.usd.toLocaleString()}</span><span class="font-mono text-[10px] ${color}">(${sign}${btcData.bitcoin.usd_24h_change.toFixed(2)}%)</span></div>`;
     }
-
     tickerArea.innerHTML = html;
-    
-    // コックピット内のターゲット計算を更新
     updateRsiTable();
 
   } catch (e) {
     console.error(e);
-    tickerArea.innerHTML = '<span class="text-rose-500 text-sm">API Error (Check Console)</span>';
+    tickerArea.innerHTML = '<span class="text-rose-500 text-sm">API Error</span>';
   }
 }
 
@@ -314,23 +319,15 @@ function checkRsi(input) {
   }
 }
 
-// ----------------------------------------
-//  Memo Logic
-// ----------------------------------------
 const memoPad = document.getElementById('memo-pad');
 const saveStatus = document.getElementById('save-status');
-
 memoPad.value = localStorage.getItem('rational_greed_memo') || '';
-
 memoPad.addEventListener('input', () => {
   localStorage.setItem('rational_greed_memo', memoPad.value);
   saveStatus.classList.remove('hidden');
   setTimeout(() => saveStatus.classList.add('hidden'), 2000);
 });
 
-// ----------------------------------------
-//  Chart Logic
-// ----------------------------------------
 function initPortfolioChart() {
     new Chart(document.getElementById('portfolioChart'), {
       type: 'doughnut',
