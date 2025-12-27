@@ -13,9 +13,21 @@
   .asset-checkbox:checked + div { background-color: #f1f5f9; border-color: currentColor; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
   .period-btn { transition: all 0.2s; }
   .period-btn.active { background-color: #0f172a; color: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
-  /* スクロールバー非表示 */
-  .scrollbar-hide::-webkit-scrollbar { display: none; }
-  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  
+  /* スクロールバーをカスタマイズ（PCで見やすく） */
+  #ticker-area::-webkit-scrollbar {
+    height: 4px; /* 高さを指定 */
+  }
+  #ticker-area::-webkit-scrollbar-track {
+    background: #1e293b; /* トラックの色 */
+  }
+  #ticker-area::-webkit-scrollbar-thumb {
+    background: #475569; /* つまみの色 */
+    border-radius: 2px;
+  }
+  #ticker-area::-webkit-scrollbar-thumb:hover {
+    background: #64748b; /* ホバー時の色 */
+  }
   
   /* RSIシグナルのアニメーション */
   @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
@@ -33,7 +45,8 @@
   <div class="bg-slate-900 text-white py-3 px-4 flex justify-between items-center sticky top-0 z-50 shadow-md rounded-b-lg mb-6 relative overflow-hidden">
     
     <!-- ティッカーエリア -->
-    <div class="flex items-center gap-6 overflow-x-auto whitespace-nowrap scrollbar-hide w-full mr-16" id="ticker-area">
+  <div class="flex items-center gap-6 overflow-x-auto whitespace-nowrap w-full mr-4 pb-1" id="ticker-area">
+  <!-- scrollbar-hide を削除し、pb-1 (padding-bottom) を追加してスクロールバーのスペースを確保 -->
       <span class="text-slate-400 font-mono text-xs shrink-0">MARKET DATA:</span>
       <span class="text-slate-500 text-sm animate-pulse">Waiting for update...</span>
     </div>
