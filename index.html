@@ -169,7 +169,7 @@
       <div class="card">
         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4"><span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded mr-2">SIM</span> 積立シミュレーション (詳細版)</h3>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-          <input type="number" id="monthly-amount" value="20000" class="w-full px-4 py-2 border rounded text-sm">
+          <input type="tel" id="monthly-amount" value="20,000" class="w-full px-4 py-2 border rounded text-sm">
           <select id="start-year" class="w-full px-4 py-2 border rounded text-sm"><option value="2021" selected>2021年</option><option value="2022">2022年</option><option value="2023">2023年</option><option value="2024">2024年</option><option value="2025">2025年</option></select>
           <select id="start-month" class="w-full px-4 py-2 border rounded text-sm"><option value="01">1月</option><option value="04">4月</option><option value="07">7月</option><option value="10">10月</option></select>
           <button id="simulate-btn" class="bg-indigo-600 text-white font-bold py-2 rounded text-sm hover:bg-indigo-700 transition">実行</button>
@@ -480,7 +480,8 @@ function updateRanking(keys, startIdx) {
 
 function setupSimulationListeners() {
   document.getElementById('simulate-btn').addEventListener('click', () => {
-    const amount = parseInt(document.getElementById('monthly-amount').value);
+    // カンマを除去してから数値に変換
+    const amount = parseInt(document.getElementById('monthly-amount').value.replace(/,/g, ''));  
     const date = document.getElementById('start-year').value + '/' + document.getElementById('start-month').value;
     const startIdx = labels.indexOf(date);
     const results = activeKeys.map(key => {
@@ -542,6 +543,25 @@ function renderChart() {
   });
 }
 
+  // --- カンマ区切りフォーマット機能 ---
+const amountInput = document.getElementById('monthly-amount');
+
+// 初期表示時にカンマを入れる
+amountInput.value = Number(amountInput.value.replace(/,/g, '')).toLocaleString();
+
+// 入力中はカンマを外す（編集しやすくするため）
+amountInput.addEventListener('focus', function() {
+  this.value = this.value.replace(/,/g, '');
+});
+
+// 入力確定時にカンマを入れる
+amountInput.addEventListener('blur', function() {
+  const num = this.value.replace(/[^0-9]/g, ''); // 数字以外を除去
+  if(num) {
+    this.value = Number(num).toLocaleString();
+  }
+});
+  
 init();
 </script>
 </body>
