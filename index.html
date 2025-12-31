@@ -545,7 +545,29 @@ function renderChart() {
       responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'nearest', axis: 'x', intersect: false },
       plugins: { legend: { display: false } },
-      scales: { x: { grid: { display: false } }, y: { ticks: { callback: v => v + '%' } } },
+// 既存の renderChart 関数の中身を修正
+    scales: { 
+      x: { 
+        grid: { display: false },
+        ticks: {
+          // 自動スキップを無効化し、手動で制御する
+          autoSkip: false,
+          maxRotation: 45,
+          minRotation: 45,
+          callback: function(val, index, values) {
+            // ロジック: 「3ヶ月ごと(index % 3 === 0)」 または 「最後のデータ(index === values.length - 1)」 なら表示
+            // ※必要に応じて '% 3' を '2' や '4' に変えて間隔を調整可能です
+            if (index % 3 === 0 || index === values.length - 1) {
+              return this.getLabelForValue(val);
+            }
+            return ''; // それ以外は隠す
+          }
+        }
+      }, 
+      y: { 
+        ticks: { callback: v => v + '%' } 
+      } 
+    },
       layout: { padding: { right: 120 } }
     }
   });
