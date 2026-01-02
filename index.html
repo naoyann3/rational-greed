@@ -183,6 +183,10 @@
   </div>
 
 <script>
+// デバッグ用：初期状態確認
+console.log('Application starting...');
+console.log('Chart.js version:', Chart.version);
+
 // --- CONFIGURATION ---
 const targets = {
   NVDA: 130, SMH: 220, AVGO: 160, PLTR: 60, CRWD: 300,
@@ -196,11 +200,8 @@ const db = {
   ASML: [55915,60412,68098,70580,74238,76361,84088,91588,83404,92534,90076,91606,78055,76972,81501,73110,73641,64999,76531,67971,60002,69829,84373,71638,86226,84207,90671,86716,100989,104931,101416,105156,87928,89288,100539,106740,128184,143376,146870,136371,150730,164536,156139,132100,119022,127814,158615,108753,113925,106371,99140,95067,106124,115814,109945,107270,144464,163015,165519,167850],
   TSM: [12720,13416,13046,12713,12898,13281,12791,13084,12497,12942,13332,13843,14134,12368,12722,12051,12177,11166,11788,11563,9902,9097,11513,9766,13599,11874,12390,11491,13782,14611,14207,14382,13978,12869,14308,14666,16646,19385,20589,21468,23706,27962,25312,25093,24787,29191,27652,31004,32255,27081,24836,23720,27845,32731,33816,33221,41501,46236,45519,46903],
   NVDA: [1361,1460,1478,1649,1770,2211,2155,2452,2317,2824,3722,3383,2824,2832,3532,2414,2402,1929,2420,2026,1681,1860,2317,1683,2518,3244,3704,3852,5859,6588,6939,6078,5945,6443,7335,7281,9535,12440,13665,13636,16194,17143,15350,18364,18073,18683,18810,21124,18620,18943,16641,16204,21096,25227,30293,28646,31230,34800,31230,29361],
-  AMD: [8964, 9002, 8659, 8888, 8801, 10382, 11645, 12173, 11518, 13686, 18023, 16557, 13168, 14258, 13341, 11090, 13016, 10444, 12586, 11773, 9158, 8877, 10770, 8491, 9805, 10711, 13054, 12182, 15992, 16562, 16035, 15451, 15358, 14687, 17815, 20787, 24712, 28913, 27315, 24747, 26196, 26096, 25010, 21115, 23432, 22072, 20542, 18963, 17867, 14980, 15372, 13854, 15951, 20507, 31103, 23908, 24041, 39416, 33967,33716],
-  // ↓ ここが修正箇所です（構文エラーの修正）
-  // 問題：SMHのデータに構文エラー（カンマの余分なスペース）
+  AMD: [8964,9002,8659,8888,8801,10382,11645,12173,11518,13686,18023,16557,13168,14258,13341,11090,13016,10444,12586,11773,9158,8877,10770,8491,9805,10711,13054,12182,15992,16562,16035,15451,15358,14687,17815,20787,24712,28913,27315,24747,26196,26096,25010,21115,23432,22072,20542,18963,17867,14980,15372,13854,15951,20507,31103,23908,24041,39416,33967,33716],
   SMH: [11861,12834,13431,13232,13694,14382,14387,14887,14342,15574,17349,17766,15871,15509,16461,14904,13063,13919,15792,14131,13369,13984,15531,13304,15468,16317,17529,15533,18476,20353,22615,22822,21656,20719,23597,24660,27392,31931,34050,33465,37744,41941,37731,35564,35056,37026,36258,38020,37541,34918,31639,30420,38379,40303,43093,42137,48496,55869,55009,56883],
-  // ↑ 修正前はカンマ後にスペースがあり、構文エラーの可能性304,15468,16317,17529,15533,18476,20353,22615,22822,21656,20719,23597,24660,27392,31931,34050,33465,37744,41941,37731,35564,35056,37026,36258,38020,37541,34918,31639,30420,38379,40303,43093,42137,48496,55869,55009,56883],
   AVGO: [4716,5006,5115,4968,5191,5321,5323,5466,5428,5723,6301,7656,6753,6790,7684,7189,7413,6636,7134,6924,6413,6949,7645,7330,7633,8101,8545,8541,11295,12558,12648,13484,12406,12546,13611,15742,17389,19593,20058,20325,20851,25829,24533,23798,24630,26010,24271,36398,34097,29917,25050,27388,34969,39841,42468,43722,49023,56886,62922,54776],
   PLTR: [3683,2546,2569,2509,2522,2914,2381,2896,2691,2946,2350,2095,1580,1370,1675,1349,1109,1239,1379,1071,1174,1299,1041,842,1015,1152,1125,1056,2056,2220,2793,2190,2390,2207,2948,2421,2371,3467,3482,3434,3405,4075,3867,4601,5312,6367,10041,11863,12711,12739,12239,11854,18982,19684,23629,23039,27106,30852,26303,28313],
   CRWD: [22590,23010,20132,22708,24416,27779,27813,30894,27512,32078,24711,23559,20821,22565,22114,24203,20444,21808,24103,25464,26362,23828,23075,13805,13818,18711,18285,16365,22790,23405,20673,23395,25002,26351,34847,36005,43105,48301,48332,45729,49233,61648,35413,40525,40046,45482,51808,53717,61341,58454,73369,60292,65476,73604,73204,62292,72868,83569,79505,74469],
@@ -278,7 +279,7 @@ async function fetchRealtimeData() {
     updateRsiTable();
 
   } catch (e) {
-    console.error(e);
+    console.error('API fetch error:', e);
     tickerArea.innerHTML = '<span class="text-rose-500 text-sm">API Error</span>';
   }
 }
@@ -344,38 +345,73 @@ memoPad.addEventListener('input', () => {
 //  Chart Logic
 // ----------------------------------------
 function initPortfolioChart() {
-    new Chart(document.getElementById('portfolioChart'), {
-      type: 'doughnut',
-      data: {
-        labels: ['Cash', 'AI Core', 'Defense', 'BTC', 'Silver'],
-        datasets: [{ data: [35, 20, 20, 15, 10], backgroundColor: ['#10b981', '#4f46e5', '#06b6d4', '#f97316', '#64748b'], borderWidth: 0 }]
-      },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '75%' }
-    });
+    try {
+        const ctx = document.getElementById('portfolioChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Cash', 'AI Core', 'Defense', 'BTC', 'Silver'],
+            datasets: [{ data: [35, 20, 20, 15, 10], backgroundColor: ['#10b981', '#4f46e5', '#06b6d4', '#f97316', '#64748b'], borderWidth: 0 }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '75%' }
+        });
+        console.log('Portfolio chart initialized');
+    } catch (error) {
+        console.error('Portfolio chart error:', error);
+    }
 }
 
 const customLabelPlugin = {
   id: 'customSmartLabels',
   afterDatasetsDraw: (chart) => {
-    const { ctx, chartArea } = chart;
+    const { ctx, chartArea, scales } = chart;
+    
+    // 安全性チェックを追加
+    if (!chartArea || !scales) {
+      console.warn('Chart area or scales not available');
+      return;
+    }
+    
     const isMobile = window.innerWidth < 768;
     const labelPoints = [];
+    
     chart.data.datasets.forEach((ds, i) => {
       const meta = chart.getDatasetMeta(i);
-      if (meta.hidden) return;
+      if (meta.hidden || !meta.data || meta.data.length === 0) return;
+      
       const lastPoint = meta.data[meta.data.length - 1];
       if (lastPoint && !isNaN(lastPoint.y)) {
-        labelPoints.push({ y: lastPoint.y, label: ds.label, color: ds.borderColor });
+        labelPoints.push({ 
+          y: lastPoint.y, 
+          label: ds.label, 
+          color: ds.borderColor 
+        });
       }
     });
+    
+    if (labelPoints.length === 0) return;
+    
     labelPoints.sort((a, b) => a.y - b.y);
     const labelHeight = isMobile ? 12 : 16;
+    
+    // ラベルが重ならないように調整
     for (let i = 1; i < labelPoints.length; i++) {
-      if (labelPoints[i].y < labelPoints[i-1].y + labelHeight) { labelPoints[i].y = labelPoints[i-1].y + labelHeight; }
+      if (labelPoints[i].y < labelPoints[i-1].y + labelHeight) {
+        labelPoints[i].y = labelPoints[i-1].y + labelHeight;
+      }
     }
+    
     ctx.save();
     ctx.font = `bold ${isMobile ? '8px' : '10px'} sans-serif`;
-    labelPoints.forEach(p => { ctx.fillStyle = p.color; ctx.fillText(p.label, chartArea.right + 5, p.y); });
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    
+    labelPoints.forEach(p => {
+      if (p.y < chartArea.top || p.y > chartArea.bottom) return;
+      ctx.fillStyle = p.color;
+      ctx.fillText(p.label, chartArea.right + 5, p.y);
+    });
+    
     ctx.restore();
   }
 };
@@ -384,6 +420,8 @@ const negativeZonePlugin = {
   id: 'negativeZone',
   beforeDraw: (chart) => {
     const { ctx, chartArea, scales } = chart;
+    if (!chartArea || !scales) return;
+    
     const zeroPixel = scales.y.getPixelForValue(0);
     if (zeroPixel < chartArea.bottom) {
         ctx.save();
@@ -395,14 +433,37 @@ const negativeZonePlugin = {
 };
 
 function init() {
-  initPortfolioChart();
-  createAssetToggles();
-  renderChart();
-  setupSimulationListeners();
-  updateDashboard();
+  console.log('Initializing application...');
   
-  // ★自動実行：ページ読み込み0.5秒後に実行
-  setTimeout(fetchRealtimeData, 500);
+  try {
+    initPortfolioChart();
+    console.log('Portfolio chart initialized');
+    
+    createAssetToggles();
+    console.log('Asset toggles created');
+    
+    renderChart();
+    console.log('Main chart rendered');
+    
+    setupSimulationListeners();
+    console.log('Simulation listeners setup');
+    
+    // デフォルトのデータでダッシュボードを更新
+    if (myChart) {
+      updateDashboard();
+      console.log('Dashboard updated');
+    }
+    
+    // APIデータの取得
+    setTimeout(() => {
+      console.log('Fetching realtime data...');
+      fetchRealtimeData();
+    }, 500);
+    
+  } catch (error) {
+    console.error('Initialization error:', error);
+    alert('アプリケーションの初期化中にエラーが発生しました。コンソールを確認してください。');
+  }
 }
 
 function createAssetToggles() {
@@ -430,6 +491,11 @@ document.querySelectorAll('.period-btn').forEach(btn => {
 });
 
 function updateDashboard(mode = 'default') {
+  if (!myChart) {
+    console.error('Chart not initialized');
+    return;
+  }
+  
   const startIdx = (currentPeriod === 'all') ? 0 : labels.indexOf(`${currentPeriod}/01`);
   myChart.data.labels = labels.slice(startIdx);
   myChart.data.datasets = activeKeys.map(key => {
@@ -439,11 +505,18 @@ function updateDashboard(mode = 'default') {
       label: meta[key].label,
       data: rawData.map(v => base ? ((v - base) / base) * 100 : 0),
       borderColor: meta[key].color,
-      borderWidth: 2, pointRadius: 0, tension: 0.1
+      borderWidth: 2, 
+      pointRadius: 0, 
+      tension: 0.1
     };
   });
-  myChart.update(mode);
-  updateRanking(activeKeys, startIdx);
+  
+  try {
+    myChart.update(mode);
+    updateRanking(activeKeys, startIdx);
+  } catch (error) {
+    console.error('Chart update error:', error);
+  }
 }
 
 function updateRanking(keys, startIdx) {
@@ -553,43 +626,74 @@ function setupSimulationListeners() {
 }
 
 function renderChart() {
-  myChart = new Chart(document.getElementById('chart'), {
-    type: 'line',
-    data: { labels: [], datasets: [] },
-    plugins: [customLabelPlugin, negativeZonePlugin],
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      interaction: { mode: 'nearest', axis: 'x', intersect: false },
-      plugins: { legend: { display: false } },
-
-    //  修正版: 全期間・全ラベル強制表示設定
-    // ---------------------------------------------------------
-    scales: { 
-      x: { 
-        grid: { display: false },
-        ticks: {
-          // 1. 自動的な間引きを完全にオフにする
-          autoSkip: false,
-
-          // 2. 表示するラベルの最大数をデータ数以上（60以上）に設定
-          maxTicksLimit: 100, 
-
-          // 3. ラベルを「垂直（90度）」にして、隣同士の重なりを防ぐ
-          //    ※斜め(45度)が良い場合はここを45にしてください
-          maxRotation: 45,
-          minRotation: 45
-        }
-      }, 
-      y: { 
-        ticks: { callback: v => v + '%' } 
-      } 
-    },
-      layout: { padding: { right: 120 } }
-    }
-  });
+  const canvas = document.getElementById('chart');
+  if (!canvas) {
+    console.error('Chart canvas not found');
+    return;
+  }
+  
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    console.error('Canvas context not available');
+    return;
+  }
+  
+  // 既存のチャートインスタンスを破棄
+  if (myChart) {
+    console.log('Destroying existing chart');
+    myChart.destroy();
+  }
+  
+  try {
+    myChart = new Chart(ctx, {
+      type: 'line',
+      data: { labels: [], datasets: [] },
+      plugins: [customLabelPlugin, negativeZonePlugin],
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'nearest', axis: 'x', intersect: false },
+        plugins: { legend: { display: false } },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: {
+              autoSkip: false,
+              maxTicksLimit: 100,
+              maxRotation: 45,
+              minRotation: 45
+            }
+          },
+          y: {
+            ticks: { callback: v => v + '%' }
+          }
+        },
+        layout: { padding: { right: 120 } }
+      }
+    });
+    
+    console.log('Chart initialized successfully');
+  } catch (error) {
+    console.error('Chart initialization failed:', error);
+    // フォールバックとしてエラーメッセージを表示
+    canvas.style.display = 'none';
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'p-4 text-center text-red-500 bg-red-50 rounded-lg';
+    errorDiv.innerHTML = `
+      <div class="font-bold mb-2">チャートの初期化に失敗しました</div>
+      <div class="text-sm">エラー: ${error.message}</div>
+      <button onclick="location.reload()" class="mt-2 px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600">ページを更新</button>
+    `;
+    canvas.parentElement.appendChild(errorDiv);
+  }
 }
 
-init();
+// DOMが完全に読み込まれてから初期化
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 </script>
 </body>
 </html>
