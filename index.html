@@ -64,7 +64,7 @@
       <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">資産パフォーマンス推移</h1>
       <p class="text-slate-500 font-medium text-xs md:text-sm">2021.01 - 2025.12 (円建て月足終値基準・為替/分割反映済み)</p>
     </div>
-    <div class="text-xl font-bold text-slate-700 font-mono hidden md:block">2025.12.31</div>
+    <div class="text-xl font-bold text-slate-700 font-mono hidden md:block">2026.01.31</div>
   </header>
 
   <div class="mb-6">
@@ -230,7 +230,7 @@ const meta = {
 const labels = [];
 let startY = 2021, startM = 1;
 // 時間軸を59から60へ変更（2025.12を含むため）
-for (let i = 0; i < 60; i++) {
+for (let i = 0; i < 61; i++) {
   labels.push(`${startY}/${String(startM).padStart(2,'0')}`);
   startM++;
   if (startM > 12) { startM = 1; startY++; }
