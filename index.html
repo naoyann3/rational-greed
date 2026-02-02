@@ -174,7 +174,7 @@
 
     <div class="lg:col-span-1 space-y-6 order-2">
       <div class="card p-4">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">表示銘柄</h3>
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">表示銘柄（クリックで表示のオンオフ切り替え可能）</h3>
         <div class="grid grid-cols-1 gap-1" id="asset-toggles"></div>
       </div>
       <div class="card h-[400px] flex flex-col">
@@ -240,7 +240,7 @@ for (let i = 0; i < 61; i++) {
 
 let myChart = null;
 let currentPeriod = 'all';
-let activeKeys = Object.keys(db).filter(k => k !== 'SP500' && meta[k]); // metaに存在するキーのみ
+let activeKeys = Object.keys(db).filter(k => meta[k]);
 let selectedAssetKey = null;
 let currentPrices = {}; 
 
