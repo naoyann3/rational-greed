@@ -232,8 +232,9 @@ const meta = {
 
 const labels = [];
 let startY = 2021, startM = 1;
-// 時間軸を59から60へ変更（2025.12を含むため）
-for (let i = 0; i < 61; i++) {
+// db.ASML の実際のデータ数に合わせることで、自動的に最新月までラベルが延びます
+const dataLength = db.ASML ? db.ASML.length : 61; 
+for (let i = 0; i < dataLength; i++) {
   labels.push(`${startY}/${String(startM).padStart(2,'0')}`);
   startM++;
   if (startM > 12) { startM = 1; startY++; }
